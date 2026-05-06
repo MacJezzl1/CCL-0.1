@@ -1,0 +1,22 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py.bak
+.env
+
+# Node
+node_modules/
+package-lock.json
+
+# Generated/temp
+generated/
+*.zip
+*.log
+.ccl_notes.json
+
+# OS
+.DS_Store
+Thumbs.db
