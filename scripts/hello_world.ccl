@@ -1,0 +1,32 @@
+// hello_world.ccl — CCL 0.1 Demo Script
+// CapeChain Labs | Run with: python core/ccl_interpreter.py scripts/hello_world.ccl
+
+// ── Variables ──────────────────────────────
+set name = "CapeChain Labs"
+set version = "0.1"
+set chain = "CCL-Devnet"
+
+// ── Output ─────────────────────────────────
+print "==========================================="
+print "  Welcome to CCL 0.1"
+print "  Built by CapeChain Labs"
+print "==========================================="
+print name
+print version
+
+// ── Create a project ───────────────────────
+create project "DemoApp" with type=web
+
+// ── Create a wallet ────────────────────────
+make wallet
+show wallet
+
+// ── Build a simple app ─────────────────────
+build app "HelloCCL" with frontend=html backend=python
+
+// ── List what was created ──────────────────
+list projects
+list files
+
+// ── Done ───────────────────────────────────
+print "Script complete. CCL 0.1 is live."

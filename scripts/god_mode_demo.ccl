@@ -1,0 +1,40 @@
+// god_mode_demo.ccl — CCL 0.1 God Mode showcase
+// Run: python3 core/ccl_interpreter.py scripts/god_mode_demo.ccl
+
+// Variables
+set project = "GodModeDemo"
+set chain   = "CCL-Devnet"
+
+print "============================================"
+print "  CCL 0.1 GOD MODE — CapeChain Labs"
+print "============================================"
+
+// Create a project
+create project "GodModeDemo" with type=web
+
+// Generate wallet
+make wallet
+show wallet
+
+// Build an app
+build app "GodModeDemo" with frontend=html backend=python
+
+// Install packages
+install flask requests
+
+// Create a note
+note "God mode demo running successfully"
+
+// Show notes
+show notes
+
+// Show version
+version
+
+// List everything
+list projects
+list files
+
+print "============================================"
+print "  God Mode activated. CCL 0.1 is LIVE."
+print "============================================"

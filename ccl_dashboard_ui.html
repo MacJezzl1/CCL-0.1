@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCL 0.1 — CapeChain Labs Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@700;900&display=swap');
+:root{
+  --bg:#040810;--bg2:#070d1c;--bg3:#0b1228;--border:#162040;
+  --border2:rgba(0,245,200,.18);--cyan:#00f5c8;--cyan2:#00bfff;
+  --green:#39ff87;--yellow:#ffd700;--mag:#df80ff;--red:#ff4466;
+  --dim:#2a3f60;--text:#a8c0d8;--white:#e0ecfa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);font-family:'JetBrains Mono',monospace;color:var(--text);display:flex;flex-direction:column}
+
+/* scanlines */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,245,200,.006) 3px,rgba(0,245,200,.006) 4px)}
+
+/* ── TOPBAR ── */
+.topbar{flex-shrink:0;height:48px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--cyan);
+  text-shadow:0 0 16px rgba(0,245,200,.5);letter-spacing:.12em;white-space:nowrap}
+.logo span{color:var(--white)}
+.topbar-sep{flex:1}
+.badge{font-size:.58rem;padding:.18rem .55rem;border-radius:3px;border:1px solid;letter-spacing:.04em;white-space:nowrap}
+.b-cyan{color:var(--cyan);border-color:rgba(0,245,200,.3)}
+.b-green{color:var(--green);border-color:rgba(57,255,135,.3)}
+.b-mag{color:var(--mag);border-color:rgba(223,128,255,.3)}
+.b-yellow{color:var(--yellow);border-color:rgba(255,215,0,.3)}
+.b-red{color:var(--red);border-color:rgba(255,68,102,.3)}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 5px var(--green);margin-right:.35rem;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.topbar-gap{width:.4rem}
+
+/* ── LAYOUT ── */
+.layout{flex:1;display:grid;grid-template-columns:200px 1fr 280px;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;padding:.5rem 0}
+.nav-sect{padding:.6rem .9rem .2rem;font-size:.55rem;letter-spacing:.25em;color:var(--dim);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:.55rem;padding:.45rem .9rem;margin:.05rem .4rem;
+  border-radius:5px;cursor:pointer;font-size:.72rem;color:var(--text);
+  transition:all .15s;border:1px solid transparent}
+.nav-item:hover{background:rgba(0,245,200,.06);color:var(--white);border-color:var(--border2)}
+.nav-item.active{background:rgba(0,245,200,.1);color:var(--cyan);border-color:var(--border2)}
+.nav-icon{font-size:.9rem;width:16px;text-align:center;flex-shrink:0}
+
+/* ── MAIN CONTENT ── */
+.main{display:flex;flex-direction:column;overflow:hidden}
+
+/* tabs */
+.tabs{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1rem}
+.tab{padding:.55rem .9rem;font-size:.68rem;cursor:pointer;color:var(--dim);
+  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+/* panels */
+.panel-wrap{flex:1;overflow-y:auto;padding:1rem}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.7rem;margin-bottom:1rem}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem;transition:border-color .2s}
+.stat:hover{border-color:var(--border2)}
+.stat-lbl{font-size:.55rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:.3rem}
+.stat-val{font-size:1.5rem;font-weight:700;line-height:1}
+.c-cyan{color:var(--cyan)}.c-green{color:var(--green)}.c-mag{color:var(--mag)}.c-yellow{color:var(--yellow)}
+.stat-sub{font-size:.58rem;color:var(--dim);margin-top:.25rem}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:.8rem}
+.card-head{padding:.6rem 1rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:.7rem;font-weight:700;color:var(--white);letter-spacing:.06em}
+.card-tag{font-size:.58rem;color:var(--cyan);border:1px solid rgba(0,245,200,.25);padding:.12rem .4rem;border-radius:3px}
+.card-body{padding:.8rem 1rem}
+
+/* ── TERMINAL ── */
+.term-wrap{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.8rem}
+.term-head{background:var(--bg3);border-bottom:1px solid var(--border);padding:.5rem .9rem;
+  display:flex;align-items:center;gap:.7rem}
+.term-dots{display:flex;gap:.35rem}
+.tdot{width:11px;height:11px;border-radius:50%}
+.tdot.r{background:#ff5f57}.tdot.y{background:#ffbd2e}.tdot.g{background:#28c840}
+.term-title{font-size:.65rem;color:var(--dim);flex:1;text-align:center}
+.term-screen{height:320px;overflow-y:auto;padding:.8rem 1rem;font-size:.72rem;line-height:1.75;scroll-behavior:smooth}
+.term-screen::-webkit-scrollbar{width:4px}
+.term-screen::-webkit-scrollbar-track{background:transparent}
+.term-screen::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.term-line{white-space:pre-wrap;word-break:break-all}
+.t-cmd-line{color:var(--white)}.t-ok{color:var(--green)}.t-info{color:var(--cyan2)}
+.t-ai{color:var(--mag)}.t-warn{color:var(--yellow)}.t-err{color:var(--red)}.t-dim{color:var(--dim)}
+.t-prompt-line{color:var(--white)}
+.term-input-row{border-top:1px solid var(--border);display:flex;align-items:center;padding:.5rem .9rem;gap:.5rem}
+.t-prompt-label{color:var(--cyan);font-size:.72rem;white-space:nowrap;font-weight:700}
+.term-input{flex:1;background:transparent;border:none;outline:none;color:var(--white);
+  font-family:inherit;font-size:.72rem;caret-color:var(--cyan)}
+.term-input::placeholder{color:var(--dim)}
+.term-send{background:transparent;border:none;color:var(--cyan);cursor:pointer;font-size:.9rem;padding:.2rem .4rem;transition:opacity .15s}
+.term-send:hover{opacity:.7}
+
+/* ── BUTTONS ── */
+.btn{padding:.45rem 1rem;border-radius:5px;font-size:.68rem;font-family:inherit;
+  font-weight:700;cursor:pointer;transition:all .18s;border:1px solid;letter-spacing:.04em;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
+.btn-primary:hover:not(:disabled){box-shadow:0 0 16px rgba(0,245,200,.4);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--cyan);border-color:rgba(0,245,200,.4)}
+.btn-outline:hover:not(:disabled){background:rgba(0,245,200,.08)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover:not(:disabled){color:var(--white);border-color:var(--border2)}
+.btn-red{background:transparent;color:var(--red);border-color:rgba(255,68,102,.3)}
+.btn-green{background:transparent;color:var(--green);border-color:rgba(57,255,135,.3)}
+.btn-sm{padding:.3rem .7rem;font-size:.62rem}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+
+/* ── INPUTS ── */
+.inp{background:var(--bg);border:1px solid var(--border);color:var(--white);
+  padding:.45rem .75rem;border-radius:5px;font-family:inherit;font-size:.72rem;outline:none;width:100%}
+.inp:focus{border-color:var(--border2)}
+.inp::placeholder{color:var(--dim)}
+.inp-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.6rem}
+.inp-row .inp{flex:1}
+.inp-label{font-size:.62rem;color:var(--dim);margin-bottom:.35rem;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── RIGHT PANEL ── */
+.right{background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden}
+.right-head{flex-shrink:0;padding:.7rem 1rem;border-bottom:1px solid var(--border);
+  font-size:.68rem;font-weight:700;color:var(--white);display:flex;align-items:center;justify-content:space-between}
+.right-scroll{flex:1;overflow-y:auto;padding:.8rem}
+
+/* wallet */
+.wallet-addr{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+  padding:.5rem .7rem;font-size:.6rem;color:var(--cyan);word-break:break-all;margin-bottom:.7rem;line-height:1.6}
+.w-row{display:flex;justify-content:space-between;padding:.3rem 0;
+  border-bottom:1px solid var(--border);font-size:.65rem}
+.w-row:last-child{border:none}
+.wk{color:var(--dim)}.wv{color:var(--white)}
+
+/* projects list */
+.proj-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:.6rem .8rem;margin-bottom:.5rem;transition:border-color .15s;cursor:pointer}
+.proj-item:hover{border-color:var(--border2)}
+.proj-name{font-size:.72rem;font-weight:700;color:var(--white)}
+.proj-meta{font-size:.6rem;color:var(--dim);margin-top:.2rem}
+
+/* templates */
+.tpl-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:.65rem .8rem;margin-bottom:.45rem;cursor:pointer;transition:all .18s}
+.tpl-item:hover{border-color:var(--border2);background:rgba(0,245,200,.03)}
+.tpl-name{font-size:.7rem;font-weight:700;color:var(--cyan)}
+.tpl-desc{font-size:.6rem;color:var(--dim);margin-top:.2rem;line-height:1.5}
+.tpl-tags{display:flex;gap:.3rem;margin-top:.4rem;flex-wrap:wrap}
+.tpl-tag{font-size:.53rem;color:var(--mag);border:1px solid rgba(223,128,255,.2);
+  padding:.08rem .3rem;border-radius:2px}
+
+/* notes */
+.note-item{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+  padding:.5rem .7rem;margin-bottom:.4rem;font-size:.65rem}
+.note-time{color:var(--dim);font-size:.58rem;margin-bottom:.2rem}
+.note-text{color:var(--text)}
+
+/* feature chips */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.8rem}
+.feat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:.6rem .7rem;font-size:.63rem;cursor:pointer;transition:all .18s}
+.feat-chip:hover{border-color:var(--border2)}
+.feat-chip-icon{font-size:1rem;margin-bottom:.25rem}
+.feat-chip-name{color:var(--white);font-weight:700;font-size:.63rem}
+.feat-chip-hint{color:var(--dim);font-size:.58rem;margin-top:.15rem}
+
+/* P2P share */
+.share-pin{background:var(--bg);border:1px solid var(--yellow);border-radius:5px;
+  padding:.5rem 1rem;font-size:1.2rem;color:var(--yellow);font-weight:700;
+  letter-spacing:.2em;text-align:center;margin:.5rem 0}
+
+/* toast */
+.toast-wrap{position:fixed;bottom:1.2rem;right:1.2rem;display:flex;flex-direction:column;gap:.4rem;z-index:10000}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
+  padding:.55rem 1rem;font-size:.68rem;color:var(--white);
+  animation:toast-in .2s ease;max-width:280px}
+.toast.ok{border-color:rgba(57,255,135,.4);color:var(--green)}
+.toast.err{border-color:rgba(255,68,102,.4);color:var(--red)}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* key modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;
+  display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;
+  padding:1.5rem;width:100%;max-width:440px}
+.modal-title{font-size:.9rem;font-weight:700;color:var(--white);margin-bottom:.5rem}
+.modal-desc{font-size:.68rem;color:var(--dim);margin-bottom:1rem;line-height:1.6}
+.modal-row{display:flex;gap:.5rem}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* loading spinner */
+.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(0,245,200,.3);
+  border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* resp */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar,.right{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">CCL <span>0.1</span></div>
+  <div class="topbar-gap"></div>
+  <span class="badge b-green"><span class="dot"></span>Live</span>
+  <span class="badge b-cyan" id="badge-chain">⬡ CCL-Devnet</span>
+  <span class="badge b-mag"  id="badge-ai">◈ AI —</span>
+  <div class="topbar-sep"></div>
+  <button class="btn btn-outline btn-sm" onclick="openKeyModal()">⚿ API Key</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="nav-sect">Workspace</div>
+  <div class="nav-item active" onclick="showTab('dashboard')"><span class="nav-icon">⬡</span> Dashboard</div>
+  <div class="nav-item" onclick="showTab('terminal')"><span class="nav-icon">▶</span> Terminal</div>
+  <div class="nav-item" onclick="showTab('projects')"><span class="nav-icon">📦</span> Projects</div>
+  <div class="nav-item" onclick="showTab('ai')"><span class="nav-icon">◈</span> AI Studio</div>
+
+  <div class="nav-sect">Tools</div>
+  <div class="nav-item" onclick="showTab('templates')"><span class="nav-icon">⚡</span> Templates</div>
+  <div class="nav-item" onclick="showTab('deploy')"><span class="nav-icon">🚀</span> Deploy</div>
+  <div class="nav-item" onclick="showTab('share')"><span class="nav-icon">↔</span> P2P Share</div>
+  <div class="nav-item" onclick="showTab('packages')"><span class="nav-icon">📦</span> Packages</div>
+
+  <div class="nav-sect">Data</div>
+  <div class="nav-item" onclick="showTab('wallet')"><span class="nav-icon">◎</span> Wallet</div>
+  <div class="nav-item" onclick="showTab('notes')"><span class="nav-icon">📝</span> Notes</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
+    <div class="tab" id="tab-terminal"  onclick="showTab('terminal')">Terminal</div>
+    <div class="tab" id="tab-projects"  onclick="showTab('projects')">Projects</div>
+    <div class="tab" id="tab-ai"        onclick="showTab('ai')">AI Studio</div>
+    <div class="tab" id="tab-templates" onclick="showTab('templates')">Templates</div>
+    <div class="tab" id="tab-deploy"    onclick="showTab('deploy')">Deploy</div>
+    <div class="tab" id="tab-share"     onclick="showTab('share')">P2P Share</div>
+    <div class="tab" id="tab-packages"  onclick="showTab('packages')">Packages</div>
+    <div class="tab" id="tab-wallet"    onclick="showTab('wallet')">Wallet</div>
+    <div class="tab" id="tab-notes"     onclick="showTab('notes')">Notes</div>
+  </div>
+
+  <div class="panel-wrap">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-row" id="stats-row">
+        <div class="stat"><div class="stat-lbl">Projects</div><div class="stat-val c-cyan" id="s-projects">—</div><div class="stat-sub">CCL projects</div></div>
+        <div class="stat"><div class="stat-lbl">AI Status</div><div class="stat-val c-mag" id="s-ai">—</div><div class="stat-sub">Claude API</div></div>
+        <div class="stat"><div class="stat-lbl">Wallet</div><div class="stat-val c-green" id="s-wallet">—</div><div class="stat-sub">CCL-Devnet</div></div>
+        <div class="stat"><div class="stat-lbl">Notes</div><div class="stat-val c-yellow" id="s-notes">—</div><div class="stat-sub">Saved</div></div>
+        <div class="stat"><div class="stat-lbl">Version</div><div class="stat-val c-cyan" id="s-version">0.1</div><div class="stat-sub">Genesis</div></div>
+      </div>
+
+      <div class="feat-grid">
+        <div class="feat-chip" onclick="showTab('ai');focusGenerate()"><div class="feat-chip-icon">◈</div><div class="feat-chip-name">AI Generate</div><div class="feat-chip-hint">Describe → full code</div></div>
+        <div class="feat-chip" onclick="showTab('templates')"><div class="feat-chip-icon">⚡</div><div class="feat-chip-name">Templates</div><div class="feat-chip-hint">Scaffold in seconds</div></div>
+        <div class="feat-chip" onclick="showTab('deploy')"><div class="feat-chip-icon">🚀</div><div class="feat-chip-name">Deploy</div><div class="feat-chip-hint">Surge · Vercel · GitHub</div></div>
+        <div class="feat-chip" onclick="showTab('share')"><div class="feat-chip-icon">↔</div><div class="feat-chip-name">P2P Share</div><div class="feat-chip-hint">Send files to CCL users</div></div>
+        <div class="feat-chip" onclick="showTab('wallet')"><div class="feat-chip-icon">◎</div><div class="feat-chip-name">Wallet</div><div class="feat-chip-hint">CCL-Devnet wallet</div></div>
+        <div class="feat-chip" onclick="showTab('terminal')"><div class="feat-chip-icon">▶</div><div class="feat-chip-name">Terminal</div><div class="feat-chip-hint">Full CCL shell</div></div>
+      </div>
+
+      <!-- mini terminal -->
+      <div class="term-wrap">
+        <div class="term-head"><div class="term-dots"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div></div><div class="term-title">CCL Terminal — Quick</div></div>
+        <div class="term-screen" id="term-mini"></div>
+        <div class="term-input-row">
+          <span class="t-prompt-label">CCL ›</span>
+          <input class="term-input" id="term-mini-input" placeholder="type a CCL command …" autocomplete="off" spellcheck="false">
+          <button class="term-send" onclick="runMini()">⏎</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TERMINAL ══ -->
+    <div class="panel" id="panel-terminal">
+      <div class="term-wrap">
+        <div class="term-head"><div class="term-dots"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div></div><div class="term-title">CCL 0.1 Full Terminal</div><span class="badge b-green" style="font-size:.55rem">LIVE</span></div>
+        <div class="term-screen" id="term-full" style="height:460px"></div>
+        <div class="term-input-row">
+          <span class="t-prompt-label">CCL ›</span>
+          <input class="term-input" id="term-full-input" placeholder="help · generate · deploy · share · make wallet …" autocomplete="off" spellcheck="false">
+          <button class="term-send" onclick="runFull()">⏎</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="runCmd('help')">help</button>
+        <button class="btn btn-ghost btn-sm" onclick="runCmd('make wallet')">make wallet</button>
+        <button class="btn btn-ghost btn-sm" onclick="runCmd('list projects')">list projects</button>
+        <button class="btn btn-ghost btn-sm" onclick="runCmd('show version')">version</button>
+        <button class="btn btn-ghost btn-sm" onclick="runCmd('list templates')">templates</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearTerm()">clear</button>
+      </div>
+    </div>
+
+    <!-- ══ PROJECTS ══ -->
+    <div class="panel" id="panel-projects">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📦 CCL Projects</div>
+          <button class="btn btn-outline btn-sm" onclick="loadProjects()">↻ Refresh</button></div>
+        <div class="card-body">
+          <div class="inp-row" style="margin-bottom:.8rem">
+            <input class="inp" id="new-proj-name" placeholder='Project name …'>
+            <select class="inp" id="new-proj-type" style="width:130px">
+              <option value="web">web</option><option value="api">api</option>
+              <option value="web3">web3</option><option value="cli">cli</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="createProject()">Create</button>
+          </div>
+          <div id="projects-list"><div class="t-dim" style="font-size:.68rem;padding:.5rem">Loading …</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AI STUDIO ══ -->
+    <div class="panel" id="panel-ai">
+      <div class="card">
+        <div class="card-head"><div class="card-title">◈ AI Generate — Claude API</div><span class="badge b-mag" id="ai-status-badge">checking …</span></div>
+        <div class="card-body">
+          <div class="inp-label">Describe what to build</div>
+          <textarea class="inp" id="gen-desc" rows="3" placeholder='a REST API with user auth and SQLite&#10;a web3 dApp with wallet connect&#10;a Python CLI tool for renaming files …'></textarea>
+          <div class="inp-row" style="margin-top:.6rem">
+            <input class="inp" id="gen-folder" placeholder="Output folder (optional)">
+            <button class="btn btn-primary" id="gen-btn" onclick="doGenerate()">◈ Generate</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">◈ AI Ask — Dev Q&amp;A</div></div>
+        <div class="card-body">
+          <div class="inp-row">
+            <input class="inp" id="ask-input" placeholder="how do I deploy Flask to Vercel?">
+            <button class="btn btn-outline" onclick="doAsk()">Ask</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">◈ AI Fix — Debug Code</div></div>
+        <div class="card-body">
+          <div class="inp-row">
+            <input class="inp" id="fix-file" placeholder="server.py">
+            <input class="inp" id="fix-error" placeholder="error message (optional)">
+            <button class="btn btn-outline" onclick="doFix()">Fix</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">◈ AI Agent — Task Planner</div></div>
+        <div class="card-body">
+          <div class="inp-row">
+            <input class="inp" id="agent-input" placeholder="build me a SaaS app with auth and payments …">
+            <button class="btn btn-outline" onclick="doAgent()">Plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TEMPLATES ══ -->
+    <div class="panel" id="panel-templates">
+      <div class="card">
+        <div class="card-head"><div class="card-title">⚡ Project Templates</div></div>
+        <div class="card-body">
+          <div class="inp-label">Project Name</div>
+          <input class="inp" id="tpl-proj-name" placeholder="my-project" style="margin-bottom:.8rem">
+          <div id="tpl-list">
+            <div class="tpl-item" onclick="applyTemplate('web3-dapp')">
+              <div class="tpl-name">⬡ web3-dapp</div>
+              <div class="tpl-desc">Ethereum dApp + ERC20 token + Hardhat + wallet connect</div>
+              <div class="tpl-tags"><span class="tpl-tag">web3</span><span class="tpl-tag">solidity</span><span class="tpl-tag">ethereum</span></div>
+            </div>
+            <div class="tpl-item" onclick="applyTemplate('saas-starter')">
+              <div class="tpl-name">◈ saas-starter</div>
+              <div class="tpl-desc">Flask + JWT auth + SQLite + login/register + dashboard</div>
+              <div class="tpl-tags"><span class="tpl-tag">saas</span><span class="tpl-tag">flask</span><span class="tpl-tag">auth</span></div>
+            </div>
+            <div class="tpl-item" onclick="applyTemplate('api-server')">
+              <div class="tpl-name">⚡ api-server</div>
+              <div class="tpl-desc">FastAPI + CORS + Bearer auth + SQLite + auto Swagger docs</div>
+              <div class="tpl-tags"><span class="tpl-tag">api</span><span class="tpl-tag">fastapi</span><span class="tpl-tag">rest</span></div>
+            </div>
+            <div class="tpl-item" onclick="applyTemplate('cli-tool')">
+              <div class="tpl-name">🛠 cli-tool</div>
+              <div class="tpl-desc">Python CLI + argparse + config file + subcommands</div>
+              <div class="tpl-tags"><span class="tpl-tag">cli</span><span class="tpl-tag">python</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DEPLOY ══ -->
+    <div class="panel" id="panel-deploy">
+      <div class="card">
+        <div class="card-head"><div class="card-title">🚀 Deploy Your Project</div></div>
+        <div class="card-body">
+          <div class="inp-label">Target Platform</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem">
+            <div class="tpl-item" onclick="doDeploy('surge')" style="text-align:center">
+              <div style="font-size:1.2rem;margin-bottom:.3rem">⚡</div>
+              <div class="tpl-name" style="text-align:center">Surge.sh</div>
+              <div class="tpl-desc">Free static hosting. No account needed.</div>
+            </div>
+            <div class="tpl-item" onclick="doDeploy('vercel')" style="text-align:center">
+              <div style="font-size:1.2rem;margin-bottom:.3rem">▲</div>
+              <div class="tpl-name" style="text-align:center">Vercel</div>
+              <div class="tpl-desc">Free tier. Best for Next.js / React.</div>
+            </div>
+            <div class="tpl-item" onclick="doDeploy('github')" style="text-align:center">
+              <div style="font-size:1.2rem;margin-bottom:.3rem">⬡</div>
+              <div class="tpl-name" style="text-align:center">GitHub Pages</div>
+              <div class="tpl-desc">Free static hosting from your repo.</div>
+            </div>
+            <div class="tpl-item" onclick="doDeploy('ipfs')" style="text-align:center">
+              <div style="font-size:1.2rem;margin-bottom:.3rem">🌐</div>
+              <div class="tpl-name" style="text-align:center">IPFS</div>
+              <div class="tpl-desc">Decentralised. Permanent. Web3-native.</div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:.8rem;margin-top:.4rem">
+            <div class="inp-label">Git Save + Push</div>
+            <div class="inp-row">
+              <input class="inp" id="save-msg" placeholder="commit message (auto-generated if empty)">
+              <button class="btn btn-green" onclick="doSave()">⬆ Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ P2P SHARE ══ -->
+    <div class="panel" id="panel-share">
+      <div class="card">
+        <div class="card-head"><div class="card-title">↔ P2P File Share</div><span class="badge b-cyan">LAN + Internet</span></div>
+        <div class="card-body">
+          <div style="font-size:.68rem;color:var(--dim);margin-bottom:1rem;line-height:1.7">
+            Send files directly between two CCL users. PIN-secured. SHA-256 verified.<br>
+            Works over local network or internet (port 9741).
+          </div>
+          <div class="inp-label">Send a File</div>
+          <div class="inp-row">
+            <input class="inp" id="share-file" placeholder="path/to/file.zip">
+            <input class="inp" id="share-pin" placeholder="PIN (auto if empty)" style="width:140px">
+            <button class="btn btn-primary" onclick="doShare()">Send</button>
+          </div>
+          <div id="share-result" style="margin-top:.6rem"></div>
+
+          <div style="border-top:1px solid var(--border);padding-top:.8rem;margin-top:.6rem">
+            <div class="inp-label">Receive a File</div>
+            <div class="inp-row">
+              <input class="inp" id="recv-ip"  placeholder="Sender IP (e.g. 192.168.1.5)">
+              <input class="inp" id="recv-pin" placeholder="PIN from sender" style="width:120px">
+              <button class="btn btn-outline" onclick="doReceive()">Receive</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PACKAGES ══ -->
+    <div class="panel" id="panel-packages">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📦 Package Manager</div><span class="badge b-cyan">pip + npm unified</span></div>
+        <div class="card-body">
+          <div class="inp-label">Install Packages</div>
+          <div class="inp-row">
+            <input class="inp" id="pkg-input" placeholder="flask react pandas express tailwind …">
+            <select class="inp" id="pkg-flag" style="width:110px">
+              <option value="">--save</option>
+              <option value="--dev">--dev</option>
+              <option value="--global">--global</option>
+            </select>
+            <button class="btn btn-primary" onclick="doInstall()">Install</button>
+          </div>
+          <div style="font-size:.62rem;color:var(--dim);margin-top:.4rem">
+            Auto-detects pip vs npm. Saves deps to .ccl project config.
+          </div>
+          <div class="btn-row" style="margin-top:.8rem">
+            <span style="font-size:.62rem;color:var(--dim)">Quick install:</span>
+            <button class="btn btn-ghost btn-sm" onclick="quickInstall('flask')">flask</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickInstall('requests')">requests</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickInstall('fastapi uvicorn')">fastapi</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickInstall('react')">react</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickInstall('express')">express</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WALLET ══ -->
+    <div class="panel" id="panel-wallet">
+      <div class="card">
+        <div class="card-head"><div class="card-title">◎ CCL Wallet</div><span class="badge b-cyan" id="w-chain-badge">CCL-Devnet</span></div>
+        <div class="card-body" id="wallet-body">
+          <div style="font-size:.68rem;color:var(--dim);padding:.5rem 0">Loading wallet …</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NOTES ══ -->
+    <div class="panel" id="panel-notes">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📝 Notes</div></div>
+        <div class="card-body">
+          <div class="inp-row" style="margin-bottom:.8rem">
+            <input class="inp" id="note-input" placeholder="Quick note …">
+            <button class="btn btn-primary btn-sm" onclick="doNote()">Save</button>
+          </div>
+          <div id="notes-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-wrap -->
+</div><!-- /main -->
+
+<!-- RIGHT PANEL -->
+<div class="right">
+  <div class="right-head">
+    <span>◎ Wallet + Projects</span>
+    <button class="btn btn-ghost btn-sm" onclick="loadAll()">↻</button>
+  </div>
+  <div class="right-scroll">
+
+    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Wallet</div>
+    <div id="right-wallet">
+      <button class="btn btn-outline" style="width:100%;margin-bottom:.6rem" onclick="createWallet()">+ Generate Wallet</button>
+    </div>
+
+    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin:.8rem 0 .5rem">Projects</div>
+    <div id="right-projects"></div>
+
+    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin:.8rem 0 .5rem">Quick Commands</div>
+    <div style="display:flex;flex-direction:column;gap:.3rem">
+      <button class="btn btn-ghost btn-sm" onclick="runCmd('help')" style="text-align:left">help</button>
+      <button class="btn btn-ghost btn-sm" onclick="runCmd('list projects')" style="text-align:left">list projects</button>
+      <button class="btn btn-ghost btn-sm" onclick="runCmd('show version')" style="text-align:left">version</button>
+      <button class="btn btn-ghost btn-sm" onclick="runCmd('make wallet')" style="text-align:left">make wallet</button>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- API KEY MODAL -->
+<div class="modal-bg" id="key-modal">
+  <div class="modal">
+    <div class="modal-title">⚿ Anthropic API Key</div>
+    <div class="modal-desc">
+      Required for AI features: generate, fix, explain, agent, ask.<br>
+      Get a free key at <strong style="color:var(--cyan)">console.anthropic.com</strong><br>
+      Key is saved locally in config/ccl_config.json.
+    </div>
+    <input class="inp" id="key-input" type="password" placeholder="sk-ant-api03-…" style="margin-bottom:.7rem">
+    <div class="modal-row">
+      <button class="btn btn-primary" onclick="saveKey()" style="flex:1">Save Key</button>
+      <button class="btn btn-ghost" onclick="closeKeyModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+let lastOutputTime = 0;
+let sseSource      = null;
+let termHistory    = [];
+let termHistIdx    = -1;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadAll();
+  connectSSE();
+  setupInputs();
+});
+
+function loadAll() {
+  loadStats();
+  loadProjects();
+  loadWallet();
+  loadNotes();
+}
+
+// ── SSE — real-time terminal output ──────────────────────────────────────────
+function connectSSE() {
+  if (sseSource) sseSource.close();
+  sseSource = new EventSource('/api/output?since=' + lastOutputTime);
+  sseSource.onmessage = (e) => {
+    const line = JSON.parse(e.data);
+    if (line.text === undefined) return;
+    lastOutputTime = line.t;
+    appendOutput(line.text);
+  };
+  sseSource.onerror = () => {
+    setTimeout(connectSSE, 2000);
+  };
+}
+
+function appendOutput(text) {
+  const miniTerm = document.getElementById('term-mini');
+  const fullTerm = document.getElementById('term-full');
+  const line = colorLine(text);
+  if (miniTerm) { miniTerm.innerHTML += line + '\n'; miniTerm.scrollTop = 9999; }
+  if (fullTerm) { fullTerm.innerHTML += line + '\n'; fullTerm.scrollTop = 9999; }
+}
+
+function colorLine(text) {
+  const t = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (t.startsWith('›'))          return `<span class="t-cmd-line">${t}</span>`;
+  if (t.includes('✓'))            return `<span class="t-ok">${t}</span>`;
+  if (t.includes('→'))            return `<span class="t-info">${t}</span>`;
+  if (t.includes('◈'))            return `<span class="t-ai">${t}</span>`;
+  if (t.includes('⚠'))            return `<span class="t-warn">${t}</span>`;
+  if (t.includes('✗'))            return `<span class="t-err">${t}</span>`;
+  if (t.trim().startsWith('//'))  return `<span class="t-dim">${t}</span>`;
+  return `<span class="t-prompt-line">${t}</span>`;
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const s = await r.json();
+    document.getElementById('s-projects').textContent = s.projects;
+    document.getElementById('s-ai').textContent       = s.ai_ready ? 'Ready' : 'No Key';
+    document.getElementById('s-wallet').textContent   = s.wallet   ? 'Active' : 'None';
+    document.getElementById('s-notes').textContent    = s.notes;
+    document.getElementById('s-version').textContent  = s.version;
+    document.getElementById('badge-ai').textContent   = s.ai_ready ? '◈ AI Ready' : '◈ AI —';
+    document.getElementById('badge-ai').className     = 'badge ' + (s.ai_ready ? 'b-mag' : 'b-red');
+    const aiBadge = document.getElementById('ai-status-badge');
+    if (aiBadge) {
+      aiBadge.textContent = s.ai_ready ? 'API Key ✓' : 'No API Key';
+      aiBadge.className   = 'badge ' + (s.ai_ready ? 'b-green' : 'b-red');
+    }
+  } catch(e) {}
+}
+
+// ── PROJECTS ─────────────────────────────────────────────────────────────────
+async function loadProjects() {
+  try {
+    const r = await fetch('/api/projects');
+    const projects = await r.json();
+    renderProjects(projects);
+  } catch(e) {}
+}
+
+function renderProjects(projects) {
+  const list = document.getElementById('projects-list');
+  const right = document.getElementById('right-projects');
+  if (!projects.length) {
+    if (list)  list.innerHTML  = '<div class="t-dim" style="font-size:.68rem;padding:.5rem">No CCL projects yet. Create one above.</div>';
+    if (right) right.innerHTML = '<div class="t-dim" style="font-size:.62rem">No projects yet</div>';
+    return;
+  }
+  const html = projects.map(p => `
+    <div class="proj-item">
+      <div class="proj-name">⬡ ${p.name}</div>
+      <div class="proj-meta">type: ${p.type} · v${p.version}${p.deps.length ? ' · ' + p.deps.join(', ') : ''}</div>
+    </div>`).join('');
+  if (list)  list.innerHTML  = html;
+  if (right) right.innerHTML = html;
+}
+
+// ── WALLET ────────────────────────────────────────────────────────────────────
+async function loadWallet() {
+  try {
+    const r = await fetch('/api/wallet');
+    const w = await r.json();
+    renderWallet(w);
+  } catch(e) {}
+}
+
+function renderWallet(w) {
+  const body  = document.getElementById('wallet-body');
+  const right = document.getElementById('right-wallet');
+  if (!w || !w.address) {
+    const html = '<button class="btn btn-outline" style="width:100%;margin-bottom:.6rem" onclick="createWallet()">+ Generate Wallet</button>';
+    if (body)  body.innerHTML  = html;
+    if (right) right.innerHTML = html;
+    return;
+  }
+  const html = `
+    <div class="wallet-addr">${w.address}</div>
+    <div class="w-row"><span class="wk">Balance</span><span class="wv" style="color:var(--cyan)">${w.balance}</span></div>
+    <div class="w-row"><span class="wk">Chain</span><span class="wv">${w.chain}</span></div>
+    <div class="w-row"><span class="wk">Created</span><span class="wv">${w.created?.slice(0,16) || '—'}</span></div>
+    <div class="btn-row"><button class="btn btn-outline btn-sm" onclick="createWallet()">New Wallet</button></div>`;
+  if (body)  body.innerHTML  = html;
+  if (right) right.innerHTML = html;
+}
+
+async function createWallet() {
+  const r = await fetch('/api/wallet/create', {method:'POST'});
+  const w = await r.json();
+  renderWallet(w);
+  loadStats();
+  toast('Wallet created!', 'ok');
+}
+
+// ── NOTES ─────────────────────────────────────────────────────────────────────
+async function loadNotes() {
+  try {
+    const r = await fetch('/api/notes');
+    const notes = await r.json();
+    renderNotes(notes);
+  } catch(e) {}
+}
+
+function renderNotes(notes) {
+  const el = document.getElementById('notes-list');
+  if (!el) return;
+  if (!notes.length) { el.innerHTML = '<div class="t-dim" style="font-size:.68rem">No notes yet.</div>'; return; }
+  el.innerHTML = [...notes].reverse().slice(0,20).map(n => `
+    <div class="note-item">
+      <div class="note-time">${n.time}</div>
+      <div class="note-text">${n.text}</div>
+    </div>`).join('');
+}
+
+// ── COMMAND RUNNER ────────────────────────────────────────────────────────────
+async function runCmd(cmd) {
+  await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({command: cmd})});
+  setTimeout(() => { loadStats(); loadProjects(); loadWallet(); loadNotes(); }, 1200);
+}
+
+async function runMini() {
+  const inp = document.getElementById('term-mini-input');
+  const cmd = inp.value.trim(); if (!cmd) return;
+  inp.value = '';
+  await runCmd(cmd);
+  showTab('dashboard');
+}
+
+async function runFull() {
+  const inp = document.getElementById('term-full-input');
+  const cmd = inp.value.trim(); if (!cmd) return;
+  termHistory.unshift(cmd); termHistIdx = -1;
+  inp.value = '';
+  await runCmd(cmd);
+}
+
+function clearTerm() {
+  document.getElementById('term-mini').innerHTML = '';
+  document.getElementById('term-full').innerHTML = '';
+}
+
+// ── AI ACTIONS ────────────────────────────────────────────────────────────────
+function focusGenerate() { setTimeout(() => document.getElementById('gen-desc')?.focus(), 100); }
+
+async function doGenerate() {
+  const desc   = document.getElementById('gen-desc').value.trim();
+  const folder = document.getElementById('gen-folder').value.trim();
+  if (!desc) { toast('Describe what to build', 'err'); return; }
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Generating …';
+  await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({description: desc, folder: folder || undefined})});
+  toast('AI generation started — check terminal', 'ok');
+  showTab('terminal');
+  setTimeout(() => { btn.disabled=false; btn.textContent='◈ Generate'; loadProjects(); }, 3000);
+}
+
+async function doAsk() {
+  const q = document.getElementById('ask-input').value.trim();
+  if (!q) return;
+  await runCmd(`ask "${q}"`);
+  showTab('terminal');
+}
+
+async function doFix() {
+  const f = document.getElementById('fix-file').value.trim();
+  const e = document.getElementById('fix-error').value.trim();
+  if (!f) { toast('Provide a filename', 'err'); return; }
+  await runCmd(`fix "${f}"${e ? ` "${e}"` : ''}`);
+  showTab('terminal');
+}
+
+async function doAgent() {
+  const t = document.getElementById('agent-input').value.trim();
+  if (!t) return;
+  await runCmd(`agent "${t}"`);
+  showTab('terminal');
+}
+
+// ── TEMPLATES ─────────────────────────────────────────────────────────────────
+async function applyTemplate(name) {
+  const proj = document.getElementById('tpl-proj-name').value.trim() || (name + '-project');
+  await fetch('/api/template', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({template: name, project: proj})});
+  toast(`Template '${name}' applied as '${proj}'`, 'ok');
+  showTab('terminal');
+  setTimeout(loadProjects, 2000);
+}
+
+// ── DEPLOY ────────────────────────────────────────────────────────────────────
+async function doDeploy(target) {
+  await fetch('/api/deploy', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({target})});
+  toast(`Deploying to ${target} …`, 'ok');
+  showTab('terminal');
+}
+
+async function doSave() {
+  const msg = document.getElementById('save-msg').value.trim();
+  await fetch('/api/save', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({message: msg})});
+  toast('Saving …', 'ok');
+  showTab('terminal');
+}
+
+// ── SHARE ─────────────────────────────────────────────────────────────────────
+async function doShare() {
+  const file = document.getElementById('share-file').value.trim();
+  const pin  = document.getElementById('share-pin').value.trim();
+  if (!file) { toast('Enter a file path', 'err'); return; }
+  await runCmd(`share "${file}"${pin ? ` "${pin}"` : ''}`);
+  showTab('terminal');
+  document.getElementById('share-result').innerHTML =
+    `<div style="font-size:.67rem;color:var(--cyan)">→ Sharing started. Check terminal for PIN.</div>`;
+}
+
+async function doReceive() {
+  const ip  = document.getElementById('recv-ip').value.trim();
+  const pin = document.getElementById('recv-pin').value.trim();
+  if (!ip || !pin) { toast('Enter IP and PIN', 'err'); return; }
+  await runCmd(`receive "${ip}" "${pin}"`);
+  showTab('terminal');
+}
+
+// ── PACKAGES ──────────────────────────────────────────────────────────────────
+async function doInstall() {
+  const pkgs = document.getElementById('pkg-input').value.trim();
+  const flag = document.getElementById('pkg-flag').value;
+  if (!pkgs) { toast('Enter package names', 'err'); return; }
+  await fetch('/api/install', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({packages: pkgs + (flag ? ' ' + flag : '')})});
+  toast(`Installing ${pkgs} …`, 'ok');
+  showTab('terminal');
+}
+
+function quickInstall(pkgs) {
+  document.getElementById('pkg-input').value = pkgs;
+  document.getElementById('packages-list')?.focus();
+  doInstall();
+}
+
+// ── PROJECTS ──────────────────────────────────────────────────────────────────
+async function createProject() {
+  const name = document.getElementById('new-proj-name').value.trim();
+  const type = document.getElementById('new-proj-type').value;
+  if (!name) { toast('Enter project name', 'err'); return; }
+  await runCmd(`create project "${name}" with type=${type}`);
+  document.getElementById('new-proj-name').value = '';
+  setTimeout(() => { loadProjects(); loadStats(); }, 1200);
+}
+
+// ── NOTES ─────────────────────────────────────────────────────────────────────
+async function doNote() {
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) return;
+  const r = await fetch('/api/note', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({text})});
+  const d = await r.json();
+  document.getElementById('note-input').value = '';
+  renderNotes(d.notes);
+  loadStats();
+  toast('Note saved', 'ok');
+}
+
+// ── API KEY ───────────────────────────────────────────────────────────────────
+function openKeyModal()  { document.getElementById('key-modal').classList.add('open'); document.getElementById('key-input').focus(); }
+function closeKeyModal() { document.getElementById('key-modal').classList.remove('open'); }
+
+async function saveKey() {
+  const key = document.getElementById('key-input').value.trim();
+  if (!key) { toast('Enter API key', 'err'); return; }
+  await fetch('/api/setkey', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key})});
+  closeKeyModal();
+  toast('API key saved — AI features active!', 'ok');
+  loadStats();
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + name);
+  const tab   = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
+  if (tab)   tab.classList.add('active');
+  // highlight sidebar
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+  });
+  if (name === 'terminal') setTimeout(() => document.getElementById('term-full-input')?.focus(), 100);
+  if (name === 'wallet')   loadWallet();
+  if (name === 'notes')    loadNotes();
+  if (name === 'projects') loadProjects();
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+function setupInputs() {
+  // Enter to run
+  ['term-mini-input','term-full-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        id === 'term-mini-input' ? runMini() : runFull();
+      }
+      if (e.key === 'ArrowUp') {
+        termHistIdx = Math.min(termHistIdx + 1, termHistory.length - 1);
+        el.value = termHistory[termHistIdx] || '';
+        setTimeout(() => el.setSelectionRange(9999,9999),0);
+      }
+      if (e.key === 'ArrowDown') {
+        termHistIdx = Math.max(termHistIdx - 1, -1);
+        el.value = termHistIdx < 0 ? '' : (termHistory[termHistIdx] || '');
+      }
+    });
+  });
+  // Enter in other inputs
+  document.getElementById('ask-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doAsk(); });
+  document.getElementById('note-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doNote(); });
+  document.getElementById('key-input')?.addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+  document.getElementById('gen-desc')?.addEventListener('keydown', e => { if(e.key==='Enter' && e.ctrlKey) doGenerate(); });
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type='') {
+  const wrap = document.getElementById('toasts');
+  const el   = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
+setInterval(loadStats, 10000);
+setInterval(loadProjects, 15000);
+</script>
+</body>
+</html>

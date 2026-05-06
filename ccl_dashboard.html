@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CCL Dashboard - Test</title>
+    <style>
+        body { font-family: monospace; background: #0a0e27; color: #00ffcc; padding: 2rem; }
+        button { background: #00ffcc; color: black; border: none; padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .card { border: 1px solid #00ffcc33; padding: 1rem; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <h1>CCL God Mode Dashboard (Test)</h1>
+    <div class="card">
+        <h2>Wallet</h2>
+        <p>Address: <span id="walletAddr">None</span></p>
+        <p>Balance: <span id="walletBal">0</span> CCL</p>
+    </div>
+    <div class="card">
+        <h2>System</h2>
+        <p>CPU: <span id="cpu">0</span>%</p>
+        <p>RAM: <span id="mem">0</span>%</p>
+        <p>AI Model: <span id="aiModel">Ollama</span></p>
+    </div>
+    <button id="terminalBtn">Launch Terminal</button>
+    <button id="genBtn">generate "my first app"</button>
+    <button id="refreshBtn">Refresh Data</button>
+
+    <script>
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('walletAddr').innerText = data.wallet?.address || 'None';
+                document.getElementById('walletBal').innerText = data.wallet?.balance || 0;
+                document.getElementById('cpu').innerText = data.cpu || 0;
+                document.getElementById('mem').innerText = data.memory || 0;
+                document.getElementById('aiModel').innerText = data.ai_model || 'Ollama';
+            } catch(e) {
+                console.log('API error:', e);
+                document.getElementById('walletAddr').innerText = 'API not ready';
+            }
+        }
+        document.getElementById('terminalBtn').onclick = () => alert('In terminal: cd ~/CCL_0.1 && python3 core/ccl_boot.py');
+        document.getElementById('genBtn').onclick = () => alert('In CCL terminal, type: generate "my first app"');
+        document.getElementById('refreshBtn').onclick = fetchStatus;
+        fetchStatus();
+        setInterval(fetchStatus, 5000);
+    </script>
+</body>
+</html>

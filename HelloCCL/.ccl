@@ -1,0 +1,6 @@
+{
+  "name": "HelloCCL",
+  "type": "app",
+  "frontend": "html",
+  "backend": "python"
+}

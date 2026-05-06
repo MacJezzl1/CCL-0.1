@@ -1,0 +1,17 @@
+{
+  "os_name":    "CCL",
+  "version":    "0.1",
+  "codename":   "Genesis",
+  "author":     "CapeChain Labs",
+  "build_date": "2025-01-01",
+  "theme":      "dark-cyber",
+  "ai_backend": "ollama",
+  "ai_model":   "llama3",
+  "chain":      "CCL-Devnet",
+  "features": {
+    "web3":      true,
+    "ai_assist": true,
+    "sandbox":   true,
+    "monetize":  false
+  }
+}

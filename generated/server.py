@@ -1,0 +1,1 @@
+import web3 from 'web3'; import eth from './ethers'; const provider = await web3.eth.getProvider(); const network = await web3.eth.getNetwork(); const accounts = await web3.eth.getAccounts(); const balance = await web3.eth.getBalance();
