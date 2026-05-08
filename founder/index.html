@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Founder Dashboard - CCL OS</title>
+    <link rel="stylesheet" href="../shell/styles/main.css">
+    <link rel="stylesheet" href="founder.css">
+</head>
+<body>
+    <div id="ccl-os">
+        <header class="ccl-topbar">
+            <div class="topbar-left">
+                <span class="ccl-logo">⚡ CCL OS 0.2</span>
+                <div class="breadcrumb">
+                    <a href="../shell/index.html">Home</a> → <span>Founder Dashboard</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-icon" id="aiGenerateBtn">🤖 AI Generate</button>
+                <button class="btn-icon">💾 Save</button>
+            </div>
+        </header>
+
+        <main class="founder-main">
+            <div class="founder-header">
+                <h1>🚀 Founder Dashboard</h1>
+                <p class="subtitle">Business plan generator, pitch deck creator, and startup command center</p>
+            </div>
+
+            <div class="founder-grid">
+                <!-- Business Idea Generator -->
+                <section class="founder-card large">
+                    <div class="card-header">
+                        <h2>💡 Business Idea Generator</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="idea-input">
+                            <textarea id="ideaInput" placeholder="Describe your business idea or let AI generate one for you..." disabled></textarea>
+                            <div class="idea-actions">
+                                <button class="btn-secondary disabled" disabled>🤖 Generate Ideas</button>
+                                <button class="btn-primary disabled" disabled>✨ Validate Idea</button>
+                            </div>
+                        </div>
+                        <div class="idea-suggestions">
+                            <p class="suggestion-label">Trending Ideas:</p>
+                            <span class="idea-tag">AI-Powered SaaS</span>
+                            <span class="idea-tag">Web3 Marketplace</span>
+                            <span class="idea-tag">DeFi Protocol</span>
+                            <span class="idea-tag">Mobile Mining App</span>
+                            <span class="idea-tag">NFT Platform</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Business Plan Generator -->
+                <section class="founder-card">
+                    <div class="card-header">
+                        <h2>📄 Business Plan</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="plan-sections">
+                            <div class="plan-section pending">
+                                <span class="section-icon">📋</span>
+                                <div>
+                                    <h4>Executive Summary</h4>
+                                    <p class="status-text">AI will generate...</p>
+                                </div>
+                            </div>
+                            <div class="plan-section pending">
+                                <span class="section-icon">🎯</span>
+                                <div>
+                                    <h4>Market Analysis</h4>
+                                    <p class="status-text">Competitor research...</p>
+                                </div>
+                            </div>
+                            <div class="plan-section pending">
+                                <span class="section-icon">💰</span>
+                                <div>
+                                    <h4>Financial Projections</h4>
+                                    <p class="status-text">Revenue models...</p>
+                                </div>
+                            </div>
+                            <div class="plan-section pending">
+                                <span class="section-icon">📊</span>
+                                <div>
+                                    <h4>Go-to-Market</h4>
+                                    <p class="status-text">Launch strategy...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Generate Full Plan</button>
+                    </div>
+                </section>
+
+                <!-- Pitch Deck Creator -->
+                <section class="founder-card">
+                    <div class="card-header">
+                        <h2>🎨 Pitch Deck Creator</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="deck-preview">
+                            <div class="slide-mini">
+                                <span>1</span>
+                                <p>Cover Slide</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>2</span>
+                                <p>Problem</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>3</span>
+                                <p>Solution</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>4</span>
+                                <p>Market Size</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>5</span>
+                                <p>Business Model</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>6</span>
+                                <p>Team</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>7</span>
+                                <p>Financials</p>
+                            </div>
+                            <div class="slide-mini">
+                                <span>8</span>
+                                <p>Ask</p>
+                            </div>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Create Pitch Deck</button>
+                    </div>
+                </section>
+
+                <!-- Investor Tools -->
+                <section class="founder-card">
+                    <div class="card-header">
+                        <h2>📧 Investor Outreach</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="investor-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">0</span>
+                                <span class="stat-label">Investors Contacted</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">0</span>
+                                <span class="stat-label">Meetings Scheduled</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">$0</span>
+                                <span class="stat-label">Commitments</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Generate Investor List</button>
+                    </div>
+                </section>
+
+                <!-- MVP Builder -->
+                <section class="founder-card large">
+                    <div class="card-header">
+                        <h2>🏗️ MVP Builder</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="mvp-timeline">
+                            <div class="timeline-item completed">
+                                <span class="timeline-dot">✓</span>
+                                <div>
+                                    <h4>Idea Validation</h4>
+                                    <p>Define problem and solution</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item pending">
+                                <span class="timeline-dot">2</span>
+                                <div>
+                                    <h4>MVP Specification</h4>
+                                    <p>Define core features</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item pending">
+                                <span class="timeline-dot">3</span>
+                                <div>
+                                    <h4>Design & Prototype</h4>
+                                    <p>UI/UX and wireframes</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item pending">
+                                <span class="timeline-dot">4</span>
+                                <div>
+                                    <h4>Development</h4>
+                                    <p>Build and test</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item pending">
+                                <span class="timeline-dot">5</span>
+                                <div>
+                                    <h4>Launch</h4>
+                                    <p>Deploy and iterate</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Start Building</button>
+                    </div>
+                </section>
+
+                <!-- Revenue Tracker -->
+                <section class="founder-card">
+                    <div class="card-header">
+                        <h2>💵 Revenue Tracker</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="revenue-chart">
+                            <div class="chart-placeholder">
+                                <p>📈 Revenue chart will appear here</p>
+                            </div>
+                        </div>
+                        <div class="revenue-stats">
+                            <div class="rev-stat">
+                                <span>MRR</span>
+                                <span class="rev-value">$0</span>
+                            </div>
+                            <div class="rev-stat">
+                                <span>Users</span>
+                                <span class="rev-value">0</span>
+                            </div>
+                            <div class="rev-stat">
+                                <span>Churn</span>
+                                <span class="rev-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <script src="founder.js"></script>
+    </div>
+</body>
+</html>

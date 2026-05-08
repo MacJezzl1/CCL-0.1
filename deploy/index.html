@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Click Deploy - CCL OS</title>
+    <link rel="stylesheet" href="../shell/styles/main.css">
+    <link rel="stylesheet" href="deploy.css">
+</head>
+<body>
+    <div id="ccl-os">
+        <header class="ccl-topbar">
+            <div class="topbar-left">
+                <span class="ccl-logo">⚡ CCL OS 0.2</span>
+                <div class="breadcrumb">
+                    <a href="../shell/index.html">Home</a> → <span>One-Click Deploy</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-icon" id="historyBtn">📜 History</button>
+                <button class="btn-icon" id="settingsBtn">⚙️</button>
+            </div>
+        </header>
+
+        <main class="deploy-main">
+            <div class="deploy-header">
+                <h1>🚀 One-Click Deploy</h1>
+                <p class="subtitle">Deploy your projects to any platform with a single click</p>
+            </div>
+
+            <div class="deploy-grid">
+                <!-- Local Machine -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">🖥️</div>
+                        <h2>Local Machine</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy to your local machine for development and testing.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Status:</span>
+                                <span class="status-ready">Ready</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Port:</span>
+                                <span>3000</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy Locally</button>
+                    </div>
+                </section>
+
+                <!-- Oracle Cloud VPS -->
+                <section class="deploy-card featured">
+                    <div class="card-header">
+                        <div class="deploy-icon">☁️</div>
+                        <h2>Oracle Cloud VPS</h2>
+                        <span class="badge popular">Popular</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy to Oracle Cloud Always Free tier (4 OCPUs, 24GB RAM).</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Cost:</span>
+                                <span class="cost-free">$0/month</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Specs:</span>
+                                <span>ARM, 24GB RAM</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy primary" id="oracleBtn">Deploy to Oracle</button>
+                    </div>
+                </section>
+
+                <!-- Docker Container -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">🐳</div>
+                        <h2>Docker Container</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Package as Docker container and deploy to any container platform.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Image:</span>
+                                <span>Auto-generated</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Registry:</span>
+                                <span>Docker Hub</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Build & Push</button>
+                    </div>
+                </section>
+
+                <!-- Kubernetes -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">☸️</div>
+                        <h2>Kubernetes</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy to K8s cluster with auto-scaling and load balancing.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Min Replicas:</span>
+                                <span>2</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Auto-scale:</span>
+                                <span>Up to 10</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy to K8s</button>
+                    </div>
+                </section>
+
+                <!-- Static Hosting -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">📄</div>
+                        <h2>Static Hosting</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy static sites to Vercel, Netlify, or GitHub Pages.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Platform:</span>
+                                <span>Auto-detect</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>CDN:</span>
+                                <span>Global</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy Static</button>
+                    </div>
+                </section>
+
+                <!-- Decentralized Storage -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">🌐</div>
+                        <h2>IPFS / Arweave</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy to decentralized storage for censorship resistance.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Network:</span>
+                                <span>IPFS</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Pinning:</span>
+                                <span>Pinata</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy DWeb</button>
+                    </div>
+                </section>
+
+                <!-- Testnet -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">🔷</div>
+                        <h2>GenX Testnet</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy smart contracts and dApps to GenX testnet.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Network:</span>
+                                <span>genx-test-1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Gas:</span>
+                                <span>Free (Faucet)</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy to Testnet</button>
+                    </div>
+                </section>
+
+                <!-- Mainnet -->
+                <section class="deploy-card">
+                    <div class="card-header">
+                        <div class="deploy-icon">⚡</div>
+                        <h2>GenX Mainnet</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Deploy production dApps to GenX mainnet.</p>
+                        <div class="deploy-details">
+                            <div class="detail-item">
+                                <span>Network:</span>
+                                <span>genx-main-1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Gas:</span>
+                                <span>Real GENX</span>
+                            </div>
+                        </div>
+                        <button class="btn-deploy disabled" disabled>Deploy to Mainnet</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Deployment Status -->
+            <div class="deploy-status" id="deployStatus">
+                <div class="status-header">
+                    <h3>🚀 Deployment Status</h3>
+                    <button class="close-btn" id="closeStatus">✕</button>
+                </div>
+                <div class="status-content" id="statusContent">
+                    <p class="status-text">No active deployments. Click a deploy button above.</p>
+                </div>
+            </div>
+        </main>
+
+        <script src="deploy.js"></script>
+    </div>
+</body>
+</html>

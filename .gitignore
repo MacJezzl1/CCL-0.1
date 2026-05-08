@@ -20,3 +20,7 @@ generated/
 # OS
 .DS_Store
 Thumbs.db
+node_modules/
+venv/
+generated/
+__pycache__/
