@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Galaxy - CCL OS</title>
+    <link rel="stylesheet" href="../shell/styles/main.css">
+    <link rel="stylesheet" href="galaxy.css">
+</head>
+<body>
+    <div id="ccl-os">
+        <header class="ccl-topbar">
+            <div class="topbar-left">
+                <span class="ccl-logo">⚡ CCL OS 0.2</span>
+                <div class="breadcrumb">
+                    <a href="../shell/index.html">Home</a> → <span>App Galaxy</span>
+                </div>
+            </div>
+            <div class="topbar-center">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search apps, tools, agents...">
+                    <button class="search-btn">🔍</button>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-icon">🛒 My Apps</button>
+                <button class="btn-icon">⚙️ Filters</button>
+            </div>
+        </header>
+
+        <main class="galaxy-main">
+            <div class="galaxy-header">
+                <h1>🌌 App Galaxy</h1>
+                <p class="subtitle">Discover AI tools, developer apps, smart contracts, and automation workflows</p>
+            </div>
+
+            <div class="category-tabs">
+                <button class="cat-tab active" data-category="all">All Apps</button>
+                <button class="cat-tab" data-category="ai">🤖 AI Tools</button>
+                <button class="cat-tab" data-category="dev">💻 Developer</button>
+                <button class="cat-tab" data-category="web3">⛓️ Web3</button>
+                <button class="cat-tab" data-category="education">📚 Education</button>
+                <button class="cat-tab" data-category="startup">🚀 Startup</button>
+                <button class="cat-tab" data-category="local">🏠 Local AI</button>
+            </div>
+
+            <div class="apps-grid" id="appsGrid">
+                <!-- AI Tools -->
+                <div class="app-card" data-category="ai">
+                    <div class="app-icon">🤖</div>
+                    <div class="app-info">
+                        <h3>Code Mentor AI</h3>
+                        <p class="app-desc">Explains code, teaches concepts, and guides beginners step-by-step.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.8</span>
+                            <span class="app-downloads">1.2k downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Install</button>
+                </div>
+
+                <div class="app-card" data-category="ai">
+                    <div class="app-icon">🔍</div>
+                    <div class="app-info">
+                        <h3>Debug Finder</h3>
+                        <p class="app-desc">AI that finds bugs, explains them, and suggests fixes automatically.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$5/mo</span>
+                            <span class="app-rating">⭐ 4.9</span>
+                            <span class="app-downloads">890 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Subscribe</button>
+                </div>
+
+                <div class="app-card" data-category="ai">
+                    <div class="app-icon">🧠</div>
+                    <div class="app-info">
+                        <h3>Architect AI</h3>
+                        <p class="app-desc">Plans system architecture, chooses tech stack, and draws diagrams.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$10/mo</span>
+                            <span class="app-rating">⭐ 4.7</span>
+                            <span class="app-downloads">650 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Subscribe</button>
+                </div>
+
+                <!-- Developer Tools -->
+                <div class="app-card" data-category="dev">
+                    <div class="app-icon">📝</div>
+                    <div class="app-info">
+                        <h3>API Tester Pro</h3>
+                        <p class="app-desc">Test REST, GraphQL, and WebSocket APIs with beautiful visualizations.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.6</span>
+                            <span class="app-downloads">2.1k downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Install</button>
+                </div>
+
+                <div class="app-card" data-category="dev">
+                    <div class="app-icon">🗄️</div>
+                    <div class="app-info">
+                        <h3>DB Designer</h3>
+                        <p class="app-desc">Visual database schema designer with AI-powered optimization.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$8/mo</span>
+                            <span class="app-rating">⭐ 4.5</span>
+                            <span class="app-downloads">430 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Subscribe</button>
+                </div>
+
+                <div class="app-card" data-category="dev">
+                    <div class="app-icon">🐳</div>
+                    <div class="app-info">
+                        <h3>Docker Manager</h3>
+                        <p class="app-desc">Visual Docker container management with one-click deployments.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.4</span>
+                            <span class="app-downloads">1.5k downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Install</button>
+                </div>
+
+                <!-- Web3 Tools -->
+                <div class="app-card" data-category="web3">
+                    <div class="app-icon">🪙</div>
+                    <div class="app-info">
+                        <h3>Token Launchpad</h3>
+                        <p class="app-desc">Launch tokens with automatic liquidity, marketing, and tracking.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$20/launch</span>
+                            <span class="app-rating">⭐ 4.9</span>
+                            <span class="app-downloads">320 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn disabled" disabled>Coming Soon</button>
+                </div>
+
+                <div class="app-card" data-category="web3">
+                    <div class="app-icon">📜</div>
+                    <div class="app-info">
+                        <h3>Contract Library</h3>
+                        <p class="app-desc">Browse, customize, and deploy smart contract templates.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.7</span>
+                            <span class="app-downloads">780 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn disabled" disabled>Coming Soon</button>
+                </div>
+
+                <div class="app-card" data-category="web3">
+                    <div class="app-icon">🔍</div>
+                    <div class="app-info">
+                        <h3>Explorer Widget</h3>
+                        <p class="app-desc">Embeddable blockchain explorer for any EVM chain.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$15/mo</span>
+                            <span class="app-rating">⭐ 4.6</span>
+                            <span class="app-downloads">210 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn disabled" disabled>Coming Soon</button>
+                </div>
+
+                <!-- Education -->
+                <div class="app-card" data-category="education">
+                    <div class="app-icon">📚</div>
+                    <div class="app-info">
+                        <h3>Skill Tree</h3>
+                        <p class="app-desc">Gamified learning paths for coding, blockchain, and AI.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.8</span>
+                            <span class="app-downloads">3.2k downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Install</button>
+                </div>
+
+                <!-- Startup Tools -->
+                <div class="app-card" data-category="startup">
+                    <div class="app-icon">🚀</div>
+                    <div class="app-info">
+                        <h3>Founder Dashboard</h3>
+                        <p class="app-desc">Business plan generator, pitch deck creator, and investor CRM.</p>
+                        <div class="app-meta">
+                            <span class="app-price">$25/mo</span>
+                            <span class="app-rating">⭐ 4.9</span>
+                            <span class="app-downloads">150 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn disabled" disabled>Coming Soon</button>
+                </div>
+
+                <!-- Local AI -->
+                <div class="app-card" data-category="local">
+                    <div class="app-icon">🏠</div>
+                    <div class="app-info">
+                        <h3>Local Model Runner</h3>
+                        <p class="app-desc">Download and run local AI models with one click. Privacy first.</p>
+                        <div class="app-meta">
+                            <span class="app-price free">Free</span>
+                            <span class="app-rating">⭐ 4.5</span>
+                            <span class="app-downloads">980 downloads</span>
+                        </div>
+                    </div>
+                    <button class="app-btn">Install</button>
+                </div>
+            </div>
+
+            <div class="publish-section">
+                <h2>🎨 Publish Your App</h2>
+                <p>Earn money by publishing your AI tools, templates, and workflows to App Galaxy.</p>
+                <button class="btn-primary">Become a Publisher</button>
+            </div>
+        </main>
+
+        <script src="galaxy.js"></script>
+    </div>
+</body>
+</html>
