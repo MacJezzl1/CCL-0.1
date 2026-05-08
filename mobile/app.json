@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "GenX Mobile Mining",
+    "slug": "genx-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0E27"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.capechain.genx",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0E27"
+      },
+      "package": "com.capechain.genx",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-ads-admob",
+      "expo-notifications",
+      "expo-secure-store",
+      "expo-purchases"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "genx-mobile-001"
+      }
+    }
+  }
+}
