@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Forge - CCL OS</title>
+    <link rel="stylesheet" href="../shell/styles/main.css">
+    <link rel="stylesheet" href="forge.css">
+</head>
+<body>
+    <div id="ccl-os">
+        <header class="ccl-topbar">
+            <div class="topbar-left">
+                <span class="ccl-logo">⚡ CCL OS 0.2</span>
+                <div class="breadcrumb">
+                    <a href="../shell/index.html">Home</a> → <span>Smart Contract Forge</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-icon" id="aiAssistBtn">🤖 AI Assist</button>
+                <button class="btn-icon" id="deployBtn">🚀 Deploy</button>
+            </div>
+        </header>
+
+        <main class="forge-main">
+            <div class="forge-header">
+                <h1>📜 Smart Contract Forge</h1>
+                <p class="subtitle">AI-powered smart contract studio with security audits and one-click deployment</p>
+            </div>
+
+            <div class="forge-grid">
+                <!-- Contract Creator -->
+                <section class="forge-card large">
+                    <div class="card-header">
+                        <h2>🎨 Contract Creator</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label>Contract Type</label>
+                            <select id="contractType" disabled>
+                                <option>ERC-20 Token</option>
+                                <option>ERC-721 NFT</option>
+                                <option>ERC-1155 Multi-Token</option>
+                                <option>DAO Governor</option>
+                                <option>Staking Contract</option>
+                                <option>Vesting Contract</option>
+                                <option>Escrow Contract</option>
+                                <option>Marketplace</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Contract Name</label>
+                            <input type="text" id="contractName" placeholder="e.g., MyAwesomeToken" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Description (AI will generate contract)</label>
+                            <textarea id="contractDesc" placeholder="Describe your contract in plain English. AI will generate the Solidity code, tokenomics, and deployment plan." disabled></textarea>
+                        </div>
+                        <button class="btn-primary disabled" disabled>✨ Generate Contract with AI</button>
+                    </div>
+                </section>
+
+                <!-- Token Creator -->
+                <section class="forge-card">
+                    <div class="card-header">
+                        <h2>🪙 Token Creator</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="token-preview">
+                            <div class="token-icon">T</div>
+                            <div class="token-info">
+                                <h3>Token Preview</h3>
+                                <p>Configure parameters below</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Token Name</label>
+                            <input type="text" placeholder="My Token" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Symbol</label>
+                            <input type="text" placeholder="MTK" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Supply</label>
+                            <input type="number" placeholder="1000000" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Creator Fee (%)</label>
+                            <input type="number" placeholder="2" disabled>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Create Token</button>
+                    </div>
+                </section>
+
+                <!-- AI Audit -->
+                <section class="forge-card">
+                    <div class="card-header">
+                        <h2>🔒 AI Security Audit</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="audit-checklist">
+                            <div class="audit-item pending">
+                                <span class="audit-icon">⏳</span>
+                                <span>Reentrancy Protection</span>
+                            </div>
+                            <div class="audit-item pending">
+                                <span class="audit-icon">⏳</span>
+                                <span>Overflow/Underflow</span>
+                            </div>
+                            <div class="audit-item pending">
+                                <span class="audit-icon">⏳</span>
+                                <span>Access Control</span>
+                            </div>
+                            <div class="audit-item pending">
+                                <span class="audit-icon">⏳</span>
+                                <span>Gas Optimization</span>
+                            </div>
+                            <div class="audit-item pending">
+                                <span class="audit-icon">⏳</span>
+                                <span>External Calls</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary disabled" disabled>Run AI Audit</button>
+                    </div>
+                </section>
+
+                <!-- Deployment -->
+                <section class="forge-card">
+                    <div class="card-header">
+                        <h2>🚀 Deployment</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="deploy-options">
+                            <button class="deploy-option disabled" disabled>
+                                <span class="deploy-icon">🔧</span>
+                                <span>GenX Testnet</span>
+                            </button>
+                            <button class="deploy-option disabled" disabled>
+                                <span class="deploy-icon">🌐</span>
+                                <span>GenX Mainnet</span>
+                            </button>
+                            <button class="deploy-option disabled" disabled>
+                                <span class="deploy-icon">⚡</span>
+                                <span>Ethereum</span>
+                            </button>
+                            <button class="deploy-option disabled" disabled>
+                                <span class="deploy-icon">🔷</span>
+                                <span>Polygon</span>
+                            </button>
+                        </div>
+                        <div class="gas-estimate">
+                            <span>Estimated Gas:</span>
+                            <span class="gas-value">-- Gwei</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tokenomics Generator -->
+                <section class="forge-card large">
+                    <div class="card-header">
+                        <h2>📊 Tokenomics Generator</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="tokenomics-chart">
+                            <div class="chart-placeholder">
+                                <p>📈 Token distribution chart will appear here</p>
+                            </div>
+                        </div>
+                        <div class="tokenomics-breakdown">
+                            <div class="breakdown-item">
+                                <span class="color-box" style="background: var(--neon-teal)"></span>
+                                <span>Public Sale: 40%</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="color-box" style="background: var(--neon-purple)"></span>
+                                <span>Team: 20%</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="color-box" style="background: var(--neon-pink)"></span>
+                                <span>Liquidity: 20%</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="color-box" style="background: var(--neon-yellow)"></span>
+                                <span>Marketing: 10%</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="color-box" style="background: var(--neon-green)"></span>
+                                <span>Community: 10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Launch Checklist -->
+                <section class="forge-card">
+                    <div class="card-header">
+                        <h2>✅ Launch Checklist</h2>
+                        <span class="badge coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="checklist">
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Smart contract deployed</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Token verified on explorer</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Liquidity added</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Website live</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Whitepaper published</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Social media setup</span>
+                            </label>
+                            <label class="checkbox-item disabled">
+                                <input type="checkbox" disabled>
+                                <span>Community started</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- AI Assist Modal -->
+        <div class="modal" id="aiAssistModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🤖 AI Contract Assistant</h2>
+                    <button class="close-btn" id="closeAiAssist">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="coming-soon-text">AI Assistant will help you:</p>
+                    <ul>
+                        <li>✨ Generate smart contracts from descriptions</li>
+                        <li>🔍 Find security vulnerabilities</li>
+                        <li>⚡ Optimize gas usage</li>
+                        <li>📄 Generate documentation</li>
+                        <li>🌐 Create landing page</li>
+                        <li>📝 Write whitepaper draft</li>
+                    </ul>
+                    <p class="status-text">Coming soon to CCL OS GenX Mode</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="forge.js"></script>
+</body>
+</html>
