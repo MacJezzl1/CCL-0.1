@@ -1,0 +1,21 @@
+[package]
+name = "ccl-os-desktop"
+version = "0.2.0"
+description = "CCL OS - Tauri Desktop Shell"
+authors = ["CapeChain Labs"]
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+tauri = { version = "1.5", features = [ "shell-open", "window-all", "dialog-all", "fs-all" ] }
+serde_json = "1.0"
+num_cpus = "1.16"
+open = "5.0"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[features]
+custom-protocol = []

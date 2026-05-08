@@ -1,0 +1,19 @@
+{
+  "name": "ccl-os-desktop",
+  "version": "0.2.0",
+  "description": "CCL OS - Tauri Desktop Shell",
+  "main": "index.js",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "lint": "eslint ."
+  },
+  "keywords": ["ccl", "os", "ai", "tauri", "rust"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0",
+    "@tauri-apps/api": "^1.5.0"
+  }
+}

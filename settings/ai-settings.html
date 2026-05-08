@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Settings - CCL OS</title>
+    <link rel="stylesheet" href="../shell/styles/main.css">
+    <link rel="stylesheet" href="ai-settings.css">
+</head>
+<body>
+    <div id="ccl-os">
+        <header class="ccl-topbar">
+            <div class="topbar-left">
+                <span class="ccl-logo">⚡ CCL OS 0.2</span>
+                <div class="breadcrumb">
+                    <a href="../shell/index.html">Home</a> → <span>AI Settings</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-icon" id="testAllBtn">🧪 Test All</button>
+                <button class="btn-icon" id="saveBtn">💾 Save</button>
+            </div>
+        </header>
+
+        <main class="settings-main">
+            <div class="settings-header">
+                <h1>🤖 AI Provider Settings</h1>
+                <p class="subtitle">Connect 30+ AI models and APIs. Bring your own API keys.</p>
+            </div>
+
+            <div class="provider-tabs">
+                <button class="provider-tab active" data-category="premium">Premium</button>
+                <button class="provider-tab" data-category="local">Local</button>
+                <button class="provider-tab" data-category="specialized">Specialized</button>
+            </div>
+
+            <div class="providers-grid" id="providersGrid">
+                <!-- OpenAI -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">🤖</div>
+                        <div>
+                            <h3>OpenAI</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="openai">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="openai-key" placeholder="sk-...">
+                                <button class="btn-toggle-visibility" data-target="openai-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Model</label>
+                            <select id="openai-model">
+                                <option>gpt-4-turbo</option>
+                                <option>gpt-4</option>
+                                <option>gpt-3.5-turbo</option>
+                            </select>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.01/1k tokens</span>
+                            <span>Context: 128k</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anthropic Claude -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">🧠</div>
+                        <div>
+                            <h3>Anthropic Claude</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="anthropic">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="anthropic-key" placeholder="sk-ant-...">
+                                <button class="btn-toggle-visibility" data-target="anthropic-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Model</label>
+                            <select id="anthropic-model">
+                                <option>claude-3-opus</option>
+                                <option>claude-3-sonnet</option>
+                                <option>claude-3-haiku</option>
+                            </select>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.015/1k tokens</span>
+                            <span>Context: 200k</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Gemini -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">✨</div>
+                        <div>
+                            <h3>Google Gemini</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="google">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="google-key" placeholder="AIza...">
+                                <button class="btn-toggle-visibility" data-target="google-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Model</label>
+                            <select id="google-model">
+                                <option>gemini-pro</option>
+                                <option>gemini-pro-vision</option>
+                            </select>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.0005/1k tokens</span>
+                            <span>Context: 32k</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groq -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">⚡</div>
+                        <div>
+                            <h3>Groq</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="groq">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="groq-key" placeholder="gsk_...">
+                                <button class="btn-toggle-visibility" data-target="groq-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.0007/1k tokens</span>
+                            <span>Speed: Ultra-fast</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ollama (Local) -->
+                <div class="provider-card" data-category="local">
+                    <div class="provider-header">
+                        <div class="provider-icon">🏠</div>
+                        <div>
+                            <h3>Ollama (Local)</h3>
+                            <span class="provider-status connected">Running</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="ollama" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>Endpoint</label>
+                            <input type="text" value="http://localhost:11434" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Available Models</label>
+                            <div class="model-tags">
+                                <span class="model-tag">llama3</span>
+                                <span class="model-tag">mistral</span>
+                                <span class="model-tag">codellama</span>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: Free</span>
+                            <span>Privacy: 100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DeepSeek -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">🔍</div>
+                        <div>
+                            <h3>DeepSeek</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="deepseek">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="deepseek-key" placeholder="...">
+                                <button class="btn-toggle-visibility" data-target="deepseek-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.0014/1k tokens</span>
+                            <span>Specialty: Coding</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- xAI Grok -->
+                <div class="provider-card" data-category="premium">
+                    <div class="provider-header">
+                        <div class="provider-icon">🚀</div>
+                        <div>
+                            <h3>xAI (Grok)</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="xai">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="xai-key" placeholder="xai-...">
+                                <button class="btn-toggle-visibility" data-target="xai-key">👁</button>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: ~$0.005/1k tokens</span>
+                            <span>Specialty: Real-time</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hugging Face -->
+                <div class="provider-card" data-category="specialized">
+                    <div class="provider-header">
+                        <div class="provider-icon">🤗</div>
+                        <div>
+                            <h3>Hugging Face</h3>
+                            <span class="provider-status disconnected">Not Connected</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" class="provider-toggle" data-provider="huggingface">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="provider-body">
+                        <div class="form-group">
+                            <label>API Token</label>
+                            <div class="api-key-input">
+                                <input type="password" id="hf-token" placeholder="hf_...">
+                                <button class="btn-toggle-visibility" data-target="hf-token">👁</button>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            <span>Cost: Varies</span>
+                            <span>Models: 1000+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="budget-section">
+                <h2>💰 Budget Control</h2>
+                <div class="budget-controls">
+                    <div class="budget-item">
+                        <label>Monthly Budget Limit</label>
+                        <input type="number" value="50" min="0" step="10">
+                        <span>$/month</span>
+                    </div>
+                    <div class="budget-item">
+                        <label>Preferred Mode</label>
+                        <select>
+                            <option>Free models first</option>
+                            <option>Balanced (free + paid)</option>
+                            <option>Premium only</option>
+                            <option>Local first</option>
+                        </select>
+                    </div>
+                    <div class="budget-usage">
+                        <div class="usage-bar">
+                            <div class="usage-fill" style="width: 15%"></div>
+                        </div>
+                        <span>$7.50 / $50.00 used</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="ai-settings.js"></script>
+    </div>
+</body>
+</html>
