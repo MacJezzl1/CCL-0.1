@@ -1,421 +1,230 @@
 /**
- * CCL MindRouter - AI Orchestration Engine
+ * CCL MindRouter - AI Orchestration Engine with Real API Integrations
  * Routes tasks to 30+ AI models and providers
- * Supports multi-AI consensus, fallback, and cost-aware routing
  */
 
-export interface AIProvider {
-  id: string;
-  name: string;
-  category: 'premium' | 'open-source' | 'local' | 'specialized';
-  models: AIModel[];
-  apiKey?: string;
+import axios from 'axios';
+
+// ===== AI Provider Config =====
+export interface AIProviderConfig {
   enabled: boolean;
-  costPer1kTokens?: number;
-  supportsStreaming: boolean;
-  supportsVision: boolean;
-  supportsFunctions: boolean;
+  apiKey?: string;
+  model?: string;
 }
 
-export interface AIModel {
-  id: string;
-  name: string;
-  contextWindow: number;
-  strengths: string[];
-  costPer1kTokens: number;
-  speed: 'fast' | 'medium' | 'slow';
-  quality: 'high' | 'medium' | 'low';
+export const AI_CONFIG_KEY = 'ccl-ai-config';
+
+// ===== Load Provider Config =====
+export function loadProviderConfig(): Record<string, AIProviderConfig> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = localStorage.getItem(AI_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
 }
 
-export interface TaskRequest {
-  task: string;
-  taskType: 'code' | 'architecture' | 'debug' | 'security' | 'ui' | 'blockchain' | 'docs' | 'reasoning' | 'vision' | 'audio';
-  preferSpeed?: boolean;
-  preferQuality?: boolean;
-  preferCost?: boolean;
-  preferPrivacy?: boolean;
-  maxCost?: number;
-  models?: string[];
+// ===== Save Provider Config =====
+export function saveProviderConfig(config: Record<string, AIProviderConfig>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(config));
 }
 
-export interface AIResponse {
-  provider: string;
-  model: string;
-  content: string;
-  cost: number;
-  tokensUsed: number;
-  latency: number;
-  confidence: number;
-}
+// ===== Real API Calls =====
 
-export class MindRouter {
-  private providers: Map<string, AIProvider> = new Map();
-  private apiKeyVault: Map<string, string> = new Map();
-
-  constructor() {
-    this.initializeProviders();
-  }
-
-  private initializeProviders() {
-    // Premium Cloud AI Providers
-    this.registerProvider({
-      id: 'openai',
-      name: 'OpenAI',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: true,
-      supportsFunctions: true,
-      models: [
-        { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', contextWindow: 128000, strengths: ['reasoning', 'code', 'complex-tasks'], costPer1kTokens: 0.01, speed: 'medium', quality: 'high' },
-        { id: 'gpt-4', name: 'GPT-4', contextWindow: 8192, strengths: ['reasoning', 'analysis'], costPer1kTokens: 0.03, speed: 'slow', quality: 'high' },
-        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', contextWindow: 16385, strengths: ['speed', 'simple-tasks'], costPer1kTokens: 0.0005, speed: 'fast', quality: 'medium' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'anthropic',
-      name: 'Anthropic Claude',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: true,
-      supportsFunctions: false,
-      models: [
-        { id: 'claude-3-opus', name: 'Claude 3 Opus', contextWindow: 200000, strengths: ['reasoning', 'analysis', 'safety'], costPer1kTokens: 0.015, speed: 'slow', quality: 'high' },
-        { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', contextWindow: 200000, strengths: ['balanced', 'code', 'writing'], costPer1kTokens: 0.003, speed: 'medium', quality: 'high' },
-        { id: 'claude-3-haiku', name: 'Claude 3 Haiku', contextWindow: 200000, strengths: ['speed', 'simple-tasks'], costPer1kTokens: 0.00025, speed: 'fast', quality: 'medium' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'google',
-      name: 'Google Gemini',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: true,
-      supportsFunctions: true,
-      models: [
-        { id: 'gemini-pro', name: 'Gemini Pro', contextWindow: 32768, strengths: ['multimodal', 'reasoning'], costPer1kTokens: 0.0005, speed: 'medium', quality: 'high' },
-        { id: 'gemini-pro-vision', name: 'Gemini Pro Vision', contextWindow: 16384, strengths: ['vision', 'image-analysis'], costPer1kTokens: 0.0005, speed: 'medium', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'mistral',
-      name: 'Mistral AI',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: true,
-      models: [
-        { id: 'mistral-large', name: 'Mistral Large', contextWindow: 32768, strengths: ['code', 'reasoning'], costPer1kTokens: 0.008, speed: 'medium', quality: 'high' },
-        { id: 'mistral-medium', name: 'Mistral Medium', contextWindow: 32768, strengths: ['balanced'], costPer1kTokens: 0.0027, speed: 'medium', quality: 'medium' },
-        { id: 'mistral-small', name: 'Mistral Small', contextWindow: 32768, strengths: ['speed'], costPer1kTokens: 0.001, speed: 'fast', quality: 'medium' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'groq',
-      name: 'Groq',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'llama3-70b-8192', name: 'Llama 3 70B', contextWindow: 8192, strengths: ['speed', 'code'], costPer1kTokens: 0.0007, speed: 'fast', quality: 'high' },
-        { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', contextWindow: 32768, strengths: ['speed', 'multilingual'], costPer1kTokens: 0.0005, speed: 'fast', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'together',
-      name: 'Together AI',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'together-llama3-70b', name: 'Llama 3 70B (Together)', contextWindow: 8192, strengths: ['code', 'reasoning'], costPer1kTokens: 0.0009, speed: 'fast', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'fireworks',
-      name: 'Fireworks AI',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: true,
-      models: [
-        { id: 'fireworks-llama3-70b', name: 'Llama 3 70B (Fireworks)', contextWindow: 8192, strengths: ['speed', 'code'], costPer1kTokens: 0.0007, speed: 'fast', quality: 'high' },
-      ]
-    });
-
-    // Open Source / Local Models
-    this.registerProvider({
-      id: 'ollama',
-      name: 'Ollama (Local)',
-      category: 'local',
-      enabled: true,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'llama3', name: 'Llama 3', contextWindow: 8192, strengths: ['local', 'code', 'general'], costPer1kTokens: 0, speed: 'medium', quality: 'high' },
-        { id: 'mistral', name: 'Mistral', contextWindow: 8192, strengths: ['local', 'fast'], costPer1kTokens: 0, speed: 'fast', quality: 'medium' },
-        { id: 'codellama', name: 'Code Llama', contextWindow: 16384, strengths: ['code', 'programming'], costPer1kTokens: 0, speed: 'medium', quality: 'high' },
-        { id: 'phi3', name: 'Phi-3', contextWindow: 4096, strengths: ['small', 'efficient'], costPer1kTokens: 0, speed: 'fast', quality: 'medium' },
-        { id: 'gemma', name: 'Gemma', contextWindow: 8192, strengths: ['local', 'balanced'], costPer1kTokens: 0, speed: 'medium', quality: 'medium' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'lmstudio',
-      name: 'LM Studio (Local)',
-      category: 'local',
-      enabled: true,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'local-model', name: 'Local Model', contextWindow: 4096, strengths: ['privacy', 'local'], costPer1kTokens: 0, speed: 'medium', quality: 'medium' },
-      ]
-    });
-
-    // Specialized Providers
-    this.registerProvider({
-      id: 'huggingface',
-      name: 'Hugging Face Inference',
-      category: 'specialized',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: true,
-      supportsFunctions: false,
-      models: [
-        { id: 'hf-mixtral', name: 'Mixtral (HF)', contextWindow: 32768, strengths: ['open-source', 'multilingual'], costPer1kTokens: 0.0005, speed: 'medium', quality: 'high' },
-        { id: 'hf-codellama', name: 'Code Llama (HF)', contextWindow: 16384, strengths: ['code'], costPer1kTokens: 0.0003, speed: 'medium', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'replicate',
-      name: 'Replicate',
-      category: 'specialized',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: true,
-      supportsFunctions: false,
-      models: [
-        { id: 'replicate-vision', name: 'Vision Model', contextWindow: 4096, strengths: ['vision', 'image-generation'], costPer1kTokens: 0.002, speed: 'slow', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'deepseek',
-      name: 'DeepSeek',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'deepseek-coder', name: 'DeepSeek Coder', contextWindow: 16384, strengths: ['code', 'programming'], costPer1kTokens: 0.0014, speed: 'fast', quality: 'high' },
-        { id: 'deepseek-chat', name: 'DeepSeek Chat', contextWindow: 32768, strengths: ['reasoning', 'chat'], costPer1kTokens: 0.0014, speed: 'medium', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'cohere',
-      name: 'Cohere',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: true,
-      models: [
-        { id: 'command-r', name: 'Command R', contextWindow: 128000, strengths: ['reasoning', 'rag'], costPer1kTokens: 0.005, speed: 'medium', quality: 'high' },
-        { id: 'command-r-plus', name: 'Command R+', contextWindow: 128000, strengths: ['reasoning', 'complex-tasks'], costPer1kTokens: 0.015, speed: 'slow', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'perplexity',
-      name: 'Perplexity',
-      category: 'specialized',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'pplx-70b', name: 'PPLX 70B', contextWindow: 8192, strengths: ['search', 'research'], costPer1kTokens: 0.001, speed: 'fast', quality: 'high' },
-      ]
-    });
-
-    this.registerProvider({
-      id: 'xai',
-      name: 'xAI (Grok)',
-      category: 'premium',
-      enabled: false,
-      supportsStreaming: true,
-      supportsVision: false,
-      supportsFunctions: false,
-      models: [
-        { id: 'grok-1', name: 'Grok-1', contextWindow: 8192, strengths: ['real-time', 'humor'], costPer1kTokens: 0.005, speed: 'medium', quality: 'medium' },
-      ]
-    });
-
-    // Add more providers: Azure AI, AWS Bedrock, Vertex AI, etc.
-  }
-
-  registerProvider(provider: AIProvider) {
-    this.providers.set(provider.id, provider);
-  }
-
-  setApiKey(providerId: string, apiKey: string) {
-    this.apiKeyVault.set(providerId, apiKey);
-    const provider = this.providers.get(providerId);
-    if (provider) {
-      provider.apiKey = apiKey;
-      provider.enabled = true;
-    }
-  }
-
-  getProvider(providerId: string): AIProvider | undefined {
-    return this.providers.get(providerId);
-  }
-
-  getAllProviders(): AIProvider[] {
-    return Array.from(this.providers.values());
-  }
-
-  getEnabledProviders(): AIProvider[] {
-    return this.getAllProviders().filter(p => p.enabled);
-  }
-
-  /**
-   * Route task to the best AI based on preferences
-   */
-  async routeTask(request: TaskRequest): Promise<string> {
-    const candidates = this.getEnabledProviders().flatMap(p => 
-      p.models.map(m => ({ provider: p, model: m }))
+// OpenAI
+export async function callOpenAI(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      { model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 2000 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
     );
-
-    // Filter by task type
-    const filtered = candidates.filter(({ model }) => {
-      if (request.taskType === 'code' && !model.strengths.includes('code')) return false;
-      if (request.taskType === 'vision' && !model.strengths.includes('vision')) return false;
-      if (request.taskType === 'reasoning' && !model.strengths.includes('reasoning')) return false;
-      return true;
-    });
-
-    if (filtered.length === 0) {
-      throw new Error('No suitable AI model found for task type: ' + request.taskType);
-    }
-
-    // Score and rank candidates
-    const scored = filtered.map(({ provider, model }) => {
-      let score = 0;
-      
-      if (request.preferQuality && model.quality === 'high') score += 3;
-      if (request.preferSpeed && model.speed === 'fast') score += 3;
-      if (request.preferCost && model.costPer1kTokens < 0.001) score += 3;
-      if (request.preferPrivacy && provider.category === 'local') score += 5;
-      
-      if (model.strengths.includes(request.taskType)) score += 2;
-      
-      return { provider, model, score };
-    });
-
-    scored.sort((a, b) => b.score - a.score);
-    const { provider, model } = scored[0];
-
-    return this.callAI(provider, model, request.task);
-  }
-
-  /**
-   * Call AI with fallback support
-   */
-  private async callAI(provider: AIProvider, model: AIModel, task: string): Promise<string> {
-    const apiKey = this.apiKeyVault.get(provider.id);
-    
-    if (provider.id === 'ollama') {
-      return this.callOllama(model.id, task);
-    }
-
-    if (!apiKey) {
-      throw new Error(`No API key found for provider: ${provider.name}`);
-    }
-
-    // Simulate API call (in production, make real API calls)
-    return `[${provider.name} / ${model.name}]\nTask processed: ${task}\n\nThis is a simulated response. In production, this would call the real API.`;
-  }
-
-  private async callOllama(modelId: string, task: string): Promise<string> {
-    try {
-      const response = await fetch('http://localhost:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: modelId,
-          prompt: task,
-          stream: false,
-        }),
-      });
-      const data = await response.json();
-      return data.response;
-    } catch (error) {
-      throw new Error('Ollama not running locally. Start Ollama first.');
-    }
-  }
-
-  /**
-   * AI Council - Get consensus from multiple AIs
-   */
-  async aiCouncil(task: string, taskType: string = 'general'): Promise<AIResponse[]> {
-    const providers = this.getEnabledProviders().slice(0, 5); // Top 5 enabled providers
-    const responses: AIResponse[] = [];
-
-    for (const provider of providers) {
-      const model = provider.models[0]; // Use first model for demo
-      try {
-        const startTime = Date.now();
-        const content = await this.callAI(provider, model, task);
-        const latency = Date.now() - startTime;
-
-        responses.push({
-          provider: provider.name,
-          model: model.name,
-          content,
-          cost: model.costPer1kTokens,
-          tokensUsed: content.length / 4,
-          latency,
-          confidence: 0.85,
-        });
-      } catch (error) {
-        console.error(`Error from ${provider.name}:`, error);
-      }
-    }
-
-    return responses;
-  }
-
-  /**
-   * Get cost estimate for a task
-   */
-  estimateCost(providerId: string, modelId: string, estimatedTokens: number): number {
-    const provider = this.providers.get(providerId);
-    if (!provider) return 0;
-    const model = provider.models.find(m => m.id === modelId);
-    if (!model) return 0;
-    return (estimatedTokens / 1000) * model.costPer1kTokens;
+    return response.data.choices[0].message.content;
+  } catch (error: any) {
+    throw new Error(`OpenAI Error: ${error.response?.data?.error?.message || error.message}`);
   }
 }
 
-// Export singleton
-export const mindRouter = new MindRouter();
+// Anthropic Claude
+export async function callClaude(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.anthropic.com/v1/messages',
+      { model, messages: [{ role: 'user', content: prompt }], max_tokens: 2000 },
+      { headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' } }
+    );
+    return response.data.content[0].text;
+  } catch (error: any) {
+    throw new Error(`Claude Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// Google Gemini
+export async function callGemini(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      { contents: [{ parts: [{ text: prompt }] }] },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+  } catch (error: any) {
+    throw new Error(`Gemini Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// Groq (Ultra-fast)
+export async function callGroq(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      { model, messages: [{ role: 'user', content: prompt }], temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data.choices[0].message.content;
+  } catch (error: any) {
+    throw new Error(`Groq Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// DeepSeek
+export async function callDeepSeek(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.deepseek.com/v1/chat/completions',
+      { model, messages: [{ role: 'user', content: prompt }], temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data.choices[0].message.content;
+  } catch (error: any) {
+    throw new Error(`DeepSeek Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// xAI Grok
+export async function callXAI(apiKey: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.x.ai/v1/chat/completions',
+      { model: 'grok-1', messages: [{ role: 'user', content: prompt }], temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data.choices[0].message.content;
+  } catch (error: any) {
+    throw new Error(`xAI Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// Mistral AI
+export async function callMistral(apiKey: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.mistral.ai/v1/chat/completions',
+      { model, messages: [{ role: 'user', content: prompt }], temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data.choices[0].message.content;
+  } catch (error: any) {
+    throw new Error(`Mistral Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// Cohere
+export async function callCohere(apiKey: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      'https://api.cohere.ai/v1/generate',
+      { model: 'command-r', prompt, max_tokens: 2000, temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data.generations?.[0]?.text || 'No response';
+  } catch (error: any) {
+    throw new Error(`Cohere Error: ${error.response?.data?.error?.message || error.message}`);
+  }
+}
+
+// Hugging Face
+export async function callHuggingFace(token: string, model: string, prompt: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      `https://api-inference.huggingface.co/models/${model}`,
+      { inputs: prompt },
+      { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+    );
+    return response.data?.[0]?.generated_text || response.data?.generated_text || 'No response';
+  } catch (error: any) {
+    throw new Error(`HuggingFace Error: ${error.response?.data?.error || error.message}`);
+  }
+}
+
+// ===== Smart Router with Fallback =====
+export async function routeToAI(task: string, taskType: string = 'general'): Promise<string> {
+  const config = loadProviderConfig();
+  const errors: string[] = [];
+  
+  // Provider order with real API calls
+  const providerOrder = [
+    { id: 'openai', call: () => {
+      const apiKey = config['openai']?.apiKey;
+      const model = config['openai']?.model || 'gpt-4-turbo';
+      if (!apiKey) throw new Error('OpenAI not configured');
+      return callOpenAI(apiKey, model, task);
+    }},
+    { id: 'anthropic', call: () => {
+      const apiKey = config['anthropic']?.apiKey;
+      const model = config['anthropic']?.model || 'claude-3-sonnet';
+      if (!apiKey) throw new Error('Claude not configured');
+      return callClaude(apiKey, model, task);
+    }},
+    { id: 'google', call: () => {
+      const apiKey = config['google']?.apiKey;
+      const model = config['google']?.model || 'gemini-pro';
+      if (!apiKey) throw new Error('Gemini not configured');
+      return callGemini(apiKey, model, task);
+    }},
+    { id: 'groq', call: () => {
+      const apiKey = config['groq']?.apiKey;
+      const model = config['groq']?.model || 'llama3-70b-8192';
+      if (!apiKey) throw new Error('Groq not configured');
+      return callGroq(apiKey, model, task);
+    }},
+    { id: 'deepseek', call: () => {
+      const apiKey = config['deepseek']?.apiKey;
+      const model = config['deepseek']?.model || 'deepseek-coder';
+      if (!apiKey) throw new Error('DeepSeek not configured');
+      return callDeepSeek(apiKey, model, task);
+    }},
+  ];
+  
+  for (const { id, call } of providerOrder) {
+    try {
+      return await call();
+    } catch (error: any) {
+      errors.push(`${id}: ${error.message}`);
+      console.warn(`Provider ${id} failed:`, error);
+    }
+  }
+  
+  throw new Error(`All providers failed:\n${errors.join('\n')}`);
+}
+
+// ===== AI Council (Multi-AI Consensus) =====
+export async function aiCouncil(task: string): Promise<Array<{provider: string, content: string, status: 'success' | 'failed', error?: string}>> {
+  const config = loadProviderConfig();
+  const providers = ['openai', 'anthropic', 'google', 'groq'].filter(p => config[p]?.enabled && config[p]?.apiKey);
+  
+  const results = await Promise.all(
+    providers.map(async (providerId) => {
+      try {
+        const content = await routeToAI(task, 'general');
+        return { provider: providerId, content, status: 'success' as const };
+      } catch (error: any) {
+        return { provider: providerId, content: '', status: 'failed' as const, error: error.message };
+      }
+    })
+  );
+  
+  return results;
+}
