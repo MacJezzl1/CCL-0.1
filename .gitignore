@@ -16,6 +16,7 @@ generated/
 *.zip
 *.log
 .ccl_notes.json
+.ccl_todo.json
 
 # OS
 .DS_Store

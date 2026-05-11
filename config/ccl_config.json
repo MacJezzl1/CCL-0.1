@@ -1,17 +1,17 @@
 {
-  "os_name":    "CCL",
-  "version":    "0.1",
-  "codename":   "Genesis",
-  "author":     "CapeChain Labs",
+  "os_name": "CCL",
+  "version": "0.3",
+  "codename": "OMNIA",
+  "author": "CapeChain Labs",
   "build_date": "2025-01-01",
-  "theme":      "dark-cyber",
+  "theme": "dark-cyber",
   "ai_backend": "ollama",
-  "ai_model":   "llama3",
-  "chain":      "CCL-Devnet",
+  "ai_model": "llama3",
+  "chain": "CCL-Net",
   "features": {
-    "web3":      true,
+    "web3": true,
     "ai_assist": true,
-    "sandbox":   true,
-    "monetize":  false
+    "sandbox": true,
+    "monetize": false
   }
 }

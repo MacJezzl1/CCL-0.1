@@ -3,984 +3,694 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CCL 0.1 — CapeChain Labs Dashboard</title>
+<title>CCL OMNIA — CapeChain Labs Desktop</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@700;900&display=swap');
-:root{
-  --bg:#040810;--bg2:#070d1c;--bg3:#0b1228;--border:#162040;
-  --border2:rgba(0,245,200,.18);--cyan:#00f5c8;--cyan2:#00bfff;
-  --green:#39ff87;--yellow:#ffd700;--mag:#df80ff;--red:#ff4466;
-  --dim:#2a3f60;--text:#a8c0d8;--white:#e0ecfa;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);font-family:'JetBrains Mono',monospace;color:var(--text);display:flex;flex-direction:column}
-
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+:root{--c1:#00f5c8;--c2:#00bfff;--c3:#df80ff;--c4:#ffd700;--ok:#39ff87;--err:#ff4466;--bg:#080820;--fg:#c8d8f0;--dim:#4a6a8a;--glass:rgba(10,10,30,.75)}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg)}
+/* animated background */
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 20%,rgba(0,245,200,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 80%,rgba(223,128,255,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%,rgba(0,191,255,.04) 0%,transparent 50%);
+  animation:mesh 15s ease-in-out infinite alternate}
+@keyframes mesh{0%{transform:scale(1) rotate(0deg)}100%{transform:scale(1.08) rotate(2deg)}}
 /* scanlines */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,245,200,.006) 3px,rgba(0,245,200,.006) 4px)}
-
-/* ── TOPBAR ── */
-.topbar{flex-shrink:0;height:48px;background:var(--bg2);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100}
-.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--cyan);
-  text-shadow:0 0 16px rgba(0,245,200,.5);letter-spacing:.12em;white-space:nowrap}
-.logo span{color:var(--white)}
-.topbar-sep{flex:1}
-.badge{font-size:.58rem;padding:.18rem .55rem;border-radius:3px;border:1px solid;letter-spacing:.04em;white-space:nowrap}
-.b-cyan{color:var(--cyan);border-color:rgba(0,245,200,.3)}
-.b-green{color:var(--green);border-color:rgba(57,255,135,.3)}
-.b-mag{color:var(--mag);border-color:rgba(223,128,255,.3)}
-.b-yellow{color:var(--yellow);border-color:rgba(255,215,0,.3)}
-.b-red{color:var(--red);border-color:rgba(255,68,102,.3)}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 5px var(--green);margin-right:.35rem;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.topbar-gap{width:.4rem}
-
-/* ── LAYOUT ── */
-.layout{flex:1;display:grid;grid-template-columns:200px 1fr 280px;overflow:hidden}
-
-/* ── SIDEBAR ── */
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;padding:.5rem 0}
-.nav-sect{padding:.6rem .9rem .2rem;font-size:.55rem;letter-spacing:.25em;color:var(--dim);text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:.55rem;padding:.45rem .9rem;margin:.05rem .4rem;
-  border-radius:5px;cursor:pointer;font-size:.72rem;color:var(--text);
-  transition:all .15s;border:1px solid transparent}
-.nav-item:hover{background:rgba(0,245,200,.06);color:var(--white);border-color:var(--border2)}
-.nav-item.active{background:rgba(0,245,200,.1);color:var(--cyan);border-color:var(--border2)}
-.nav-icon{font-size:.9rem;width:16px;text-align:center;flex-shrink:0}
-
-/* ── MAIN CONTENT ── */
-.main{display:flex;flex-direction:column;overflow:hidden}
-
-/* tabs */
-.tabs{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1rem}
-.tab{padding:.55rem .9rem;font-size:.68rem;cursor:pointer;color:var(--dim);
-  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
-
-/* panels */
-.panel-wrap{flex:1;overflow-y:auto;padding:1rem}
-.panel{display:none}
-.panel.active{display:block}
-
-/* ── STATS ROW ── */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.7rem;margin-bottom:1rem}
-.stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem;transition:border-color .2s}
-.stat:hover{border-color:var(--border2)}
-.stat-lbl{font-size:.55rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:.3rem}
-.stat-val{font-size:1.5rem;font-weight:700;line-height:1}
-.c-cyan{color:var(--cyan)}.c-green{color:var(--green)}.c-mag{color:var(--mag)}.c-yellow{color:var(--yellow)}
-.stat-sub{font-size:.58rem;color:var(--dim);margin-top:.25rem}
-
-/* ── CARDS ── */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:.8rem}
-.card-head{padding:.6rem 1rem;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between}
-.card-title{font-size:.7rem;font-weight:700;color:var(--white);letter-spacing:.06em}
-.card-tag{font-size:.58rem;color:var(--cyan);border:1px solid rgba(0,245,200,.25);padding:.12rem .4rem;border-radius:3px}
-.card-body{padding:.8rem 1rem}
-
-/* ── TERMINAL ── */
-.term-wrap{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.8rem}
-.term-head{background:var(--bg3);border-bottom:1px solid var(--border);padding:.5rem .9rem;
-  display:flex;align-items:center;gap:.7rem}
-.term-dots{display:flex;gap:.35rem}
-.tdot{width:11px;height:11px;border-radius:50%}
-.tdot.r{background:#ff5f57}.tdot.y{background:#ffbd2e}.tdot.g{background:#28c840}
-.term-title{font-size:.65rem;color:var(--dim);flex:1;text-align:center}
-.term-screen{height:320px;overflow-y:auto;padding:.8rem 1rem;font-size:.72rem;line-height:1.75;scroll-behavior:smooth}
-.term-screen::-webkit-scrollbar{width:4px}
-.term-screen::-webkit-scrollbar-track{background:transparent}
-.term-screen::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.term-line{white-space:pre-wrap;word-break:break-all}
-.t-cmd-line{color:var(--white)}.t-ok{color:var(--green)}.t-info{color:var(--cyan2)}
-.t-ai{color:var(--mag)}.t-warn{color:var(--yellow)}.t-err{color:var(--red)}.t-dim{color:var(--dim)}
-.t-prompt-line{color:var(--white)}
-.term-input-row{border-top:1px solid var(--border);display:flex;align-items:center;padding:.5rem .9rem;gap:.5rem}
-.t-prompt-label{color:var(--cyan);font-size:.72rem;white-space:nowrap;font-weight:700}
-.term-input{flex:1;background:transparent;border:none;outline:none;color:var(--white);
-  font-family:inherit;font-size:.72rem;caret-color:var(--cyan)}
-.term-input::placeholder{color:var(--dim)}
-.term-send{background:transparent;border:none;color:var(--cyan);cursor:pointer;font-size:.9rem;padding:.2rem .4rem;transition:opacity .15s}
-.term-send:hover{opacity:.7}
-
-/* ── BUTTONS ── */
-.btn{padding:.45rem 1rem;border-radius:5px;font-size:.68rem;font-family:inherit;
-  font-weight:700;cursor:pointer;transition:all .18s;border:1px solid;letter-spacing:.04em;white-space:nowrap}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-primary{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
-.btn-primary:hover:not(:disabled){box-shadow:0 0 16px rgba(0,245,200,.4);transform:translateY(-1px)}
-.btn-outline{background:transparent;color:var(--cyan);border-color:rgba(0,245,200,.4)}
-.btn-outline:hover:not(:disabled){background:rgba(0,245,200,.08)}
-.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
-.btn-ghost:hover:not(:disabled){color:var(--white);border-color:var(--border2)}
-.btn-red{background:transparent;color:var(--red);border-color:rgba(255,68,102,.3)}
-.btn-green{background:transparent;color:var(--green);border-color:rgba(57,255,135,.3)}
-.btn-sm{padding:.3rem .7rem;font-size:.62rem}
-.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
-
-/* ── INPUTS ── */
-.inp{background:var(--bg);border:1px solid var(--border);color:var(--white);
-  padding:.45rem .75rem;border-radius:5px;font-family:inherit;font-size:.72rem;outline:none;width:100%}
-.inp:focus{border-color:var(--border2)}
-.inp::placeholder{color:var(--dim)}
-.inp-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.6rem}
-.inp-row .inp{flex:1}
-.inp-label{font-size:.62rem;color:var(--dim);margin-bottom:.35rem;letter-spacing:.06em;text-transform:uppercase}
-
-/* ── RIGHT PANEL ── */
-.right{background:var(--bg2);border-left:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden}
-.right-head{flex-shrink:0;padding:.7rem 1rem;border-bottom:1px solid var(--border);
-  font-size:.68rem;font-weight:700;color:var(--white);display:flex;align-items:center;justify-content:space-between}
-.right-scroll{flex:1;overflow-y:auto;padding:.8rem}
-
-/* wallet */
-.wallet-addr{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
-  padding:.5rem .7rem;font-size:.6rem;color:var(--cyan);word-break:break-all;margin-bottom:.7rem;line-height:1.6}
-.w-row{display:flex;justify-content:space-between;padding:.3rem 0;
-  border-bottom:1px solid var(--border);font-size:.65rem}
-.w-row:last-child{border:none}
-.wk{color:var(--dim)}.wv{color:var(--white)}
-
-/* projects list */
-.proj-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
-  padding:.6rem .8rem;margin-bottom:.5rem;transition:border-color .15s;cursor:pointer}
-.proj-item:hover{border-color:var(--border2)}
-.proj-name{font-size:.72rem;font-weight:700;color:var(--white)}
-.proj-meta{font-size:.6rem;color:var(--dim);margin-top:.2rem}
-
-/* templates */
-.tpl-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
-  padding:.65rem .8rem;margin-bottom:.45rem;cursor:pointer;transition:all .18s}
-.tpl-item:hover{border-color:var(--border2);background:rgba(0,245,200,.03)}
-.tpl-name{font-size:.7rem;font-weight:700;color:var(--cyan)}
-.tpl-desc{font-size:.6rem;color:var(--dim);margin-top:.2rem;line-height:1.5}
-.tpl-tags{display:flex;gap:.3rem;margin-top:.4rem;flex-wrap:wrap}
-.tpl-tag{font-size:.53rem;color:var(--mag);border:1px solid rgba(223,128,255,.2);
-  padding:.08rem .3rem;border-radius:2px}
-
-/* notes */
-.note-item{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
-  padding:.5rem .7rem;margin-bottom:.4rem;font-size:.65rem}
-.note-time{color:var(--dim);font-size:.58rem;margin-bottom:.2rem}
-.note-text{color:var(--text)}
-
-/* feature chips */
-.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.8rem}
-.feat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
-  padding:.6rem .7rem;font-size:.63rem;cursor:pointer;transition:all .18s}
-.feat-chip:hover{border-color:var(--border2)}
-.feat-chip-icon{font-size:1rem;margin-bottom:.25rem}
-.feat-chip-name{color:var(--white);font-weight:700;font-size:.63rem}
-.feat-chip-hint{color:var(--dim);font-size:.58rem;margin-top:.15rem}
-
-/* P2P share */
-.share-pin{background:var(--bg);border:1px solid var(--yellow);border-radius:5px;
-  padding:.5rem 1rem;font-size:1.2rem;color:var(--yellow);font-weight:700;
-  letter-spacing:.2em;text-align:center;margin:.5rem 0}
-
-/* toast */
-.toast-wrap{position:fixed;bottom:1.2rem;right:1.2rem;display:flex;flex-direction:column;gap:.4rem;z-index:10000}
-.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
-  padding:.55rem 1rem;font-size:.68rem;color:var(--white);
-  animation:toast-in .2s ease;max-width:280px}
-.toast.ok{border-color:rgba(57,255,135,.4);color:var(--green)}
-.toast.err{border-color:rgba(255,68,102,.4);color:var(--red)}
-@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* key modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;
-  display:none;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;
-  padding:1.5rem;width:100%;max-width:440px}
-.modal-title{font-size:.9rem;font-weight:700;color:var(--white);margin-bottom:.5rem}
-.modal-desc{font-size:.68rem;color:var(--dim);margin-bottom:1rem;line-height:1.6}
-.modal-row{display:flex;gap:.5rem}
-
-/* scrollbar */
-::-webkit-scrollbar{width:4px;height:4px}
+body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,245,200,.015) 2px,rgba(0,245,200,.015) 3px)}
+/* floating particles */
+#particles{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.p{position:absolute;width:3px;height:3px;background:rgba(0,245,200,.3);border-radius:50%;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) scale(1);opacity:0}}
+/* ===== DESKTOP ===== */
+#desktop{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column}
+/* WALLPAPER */
+#wallpaper{position:fixed;inset:0;z-index:-1;transition:opacity 1s}
+/* TASKBAR */
+#taskbar{flex-shrink:0;height:42px;background:rgba(8,8,32,.85);backdrop-filter:blur(20px);border-top:1px solid rgba(0,245,200,.1);display:flex;align-items:center;padding:0 12px;gap:4px;position:fixed;bottom:0;left:0;right:0;z-index:100}
+#startBtn{padding:6px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--fg);font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s}
+#startBtn:hover{background:rgba(0,245,200,.1);border-color:rgba(0,245,200,.2)}
+#startBtn .g{background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.taskbar-sep{width:1px;height:20px;background:rgba(255,255,255,.06);margin:0 6px}
+.taskbar-items{display:flex;flex:1;gap:2px;overflow-x:auto}
+.taskbar-item{padding:3px 10px;border-radius:4px;font-size:.65rem;color:var(--dim);cursor:pointer;white-space:nowrap;transition:all .2s;border:1px solid transparent}
+.taskbar-item:hover,.taskbar-item.active{background:rgba(0,245,200,.08);color:var(--fg);border-color:rgba(0,245,200,.12)}
+#taskbarClock{font-size:.65rem;color:var(--dim);font-family:'JetBrains Mono',monospace;padding:0 8px;white-space:nowrap}
+#trayIcon{width:20px;height:20px;border-radius:50%;margin:0 4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;cursor:pointer}
+/* DESKTOP ICONS */
+#desktopIcons{position:fixed;top:12px;left:12px;z-index:3;display:flex;flex-direction:column;gap:8px}
+.desktop-icon{width:72px;padding:8px 4px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .2s;border:1px solid transparent;text-align:center}
+.desktop-icon:hover{background:rgba(0,245,200,.06);border-color:rgba(0,245,200,.1)}
+.desktop-icon .icon{font-size:1.6rem;line-height:1}
+.desktop-icon .label{font-size:.55rem;color:var(--dim);line-height:1.2;word-break:break-word}
+/* WINDOWS */
+#windows{position:fixed;inset:0;top:0;bottom:42px;z-index:5;pointer-events:none}
+.window{position:absolute;border-radius:10px;border:1px solid rgba(0,245,200,.12);background:var(--glass);backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;pointer-events:auto;min-width:280px;min-height:120px;animation:winIn .25s ease}
+@keyframes winIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.win-header{flex-shrink:0;height:34px;display:flex;align-items:center;padding:0 10px;gap:8px;cursor:move;background:rgba(0,245,200,.04);border-bottom:1px solid rgba(0,245,200,.06)}
+.win-dots{display:flex;gap:5px}
+.win-dot{width:8px;height:8px;border-radius:50%;cursor:pointer;transition:opacity .2s}
+.win-dot:hover{opacity:.7}
+.win-dot.r{background:#ff4466}
+.win-dot.y{background:#ffd700}
+.win-dot.g{background:var(--ok)}
+.win-title{font-size:.65rem;color:var(--dim);font-family:'JetBrains Mono',monospace;flex:1}
+.win-body{flex:1;overflow:auto;padding:10px 12px;font-size:.72rem}
+.win-body::-webkit-scrollbar{width:3px}
+.win-body::-webkit-scrollbar-thumb{background:rgba(0,245,200,.15);border-radius:2px}
+/* TERMINAL WINDOW */
+.term-win .win-body{background:rgba(0,0,0,.4);padding:0;display:flex;flex-direction:column}
+.term-output{flex:1;overflow-y:auto;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;line-height:1.5;color:#8aaac8;min-height:100px}
+.term-output .l{white-space:pre-wrap;word-break:break-all}
+.term-output .l.cmd{color:var(--c1)}
+.term-output .l.out{color:#8aaac8}
+.term-output .l.ok{color:var(--ok)}
+.term-output .l.err{color:var(--err)}
+.term-input-row{flex-shrink:0;display:flex;border-top:1px solid rgba(0,245,200,.08);padding:5px 10px;background:rgba(0,0,0,.3);align-items:center}
+.term-prompt{color:var(--c1);font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-right:6px}
+.term-input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:.68rem}
+.term-input::placeholder{color:#2a4a5a}
+/* SYS MONITOR */
+.sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sys-metric{text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,.2)}
+.sys-metric .val{font-size:1.2rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sys-metric .lbl{font-size:.55rem;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.08em}
+.bar-bg{height:4px;border-radius:2px;background:rgba(255,255,255,.05);margin-top:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .5s}
+/* TODO */
+.todo-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.7rem}
+.todo-item:last-child{border:none}
+.todo-cb{width:14px;height:14px;border-radius:3px;border:1px solid var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.todo-cb.done{background:var(--ok);border-color:var(--ok)}
+.todo-cb.done::after{content:'✓';color:#000;font-size:9px;font-weight:700}
+.todo-text{flex:1}
+.todo-text.done{text-decoration:line-through;color:var(--dim)}
+.todo-del{font-size:.55rem;color:var(--dim);cursor:pointer;padding:2px 4px}
+/* NOTES */
+.note-item{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.7rem;display:flex;gap:6px}
+.note-item:last-child{border:none}
+.note-time{color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.6rem;white-space:nowrap}
+/* PROJECTS */
+.proj-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.7rem}
+.proj-item:last-child{border:none}
+.proj-icon{font-size:1rem}
+/* PROVIDERS */
+.prov-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:.68rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.prov-item:last-child{border:none}
+.prov-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.prov-on{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.prov-off{background:var(--dim)}
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.7rem}
+select{background:rgba(0,0,0,.3);border:1px solid rgba(0,245,200,.12);border-radius:4px;padding:4px 8px;color:var(--fg);font-size:.65rem;font-family:'JetBrains Mono',monospace}
+input[type=text]{background:rgba(0,0,0,.3);border:1px solid rgba(0,245,200,.12);border-radius:4px;padding:4px 8px;color:var(--fg);font-size:.65rem;font-family:'JetBrains Mono',monospace;outline:none}
+input[type=text]:focus{border-color:rgba(0,245,200,.3)}
+button{background:rgba(0,245,200,.08);border:1px solid rgba(0,245,200,.15);border-radius:4px;padding:4px 10px;color:var(--fg);font-size:.65rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+button:hover{background:rgba(0,245,200,.15);border-color:rgba(0,245,200,.25)}
+/* START MENU */
+#startMenu{position:fixed;bottom:44px;left:8px;z-index:99;width:240px;border-radius:10px;border:1px solid rgba(0,245,200,.12);background:var(--glass);backdrop-filter:blur(20px);padding:8px;display:none;animation:winIn .15s ease;box-shadow:0 4px 30px rgba(0,0,0,.5)}
+.start-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:.68rem;transition:all .2s;border:1px solid transparent}
+.start-item:hover{background:rgba(0,245,200,.08);border-color:rgba(0,245,200,.1)}
+/* WELCOME OVERLAY */
+#welcomeOverlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:var(--bg);animation:fadeOut 1s ease 2.5s forwards}
+@keyframes fadeOut{0%{opacity:1}100%{opacity:0;pointer-events:none}}
+#welcomeOverlay .content{text-align:center;animation:welcomIn .8s ease}
+@keyframes welcomIn{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+#welcomeOverlay h1{font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.1em}
+#welcomeOverlay .sub{font-size:.85rem;color:var(--dim);margin-top:8px;letter-spacing:.2em;font-weight:300}
+#welcomeOverlay .tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#2a4a5a;margin-top:16px;letter-spacing:.1em}
+#welcomeOverlay .loader{margin-top:20px;display:flex;justify-content:center;gap:4px}
+#welcomeOverlay .loader span{width:6px;height:6px;border-radius:50%;animation:loadAnim 1.2s ease-in-out infinite}
+#welcomeOverlay .loader span:nth-child(1){background:var(--c1);animation-delay:0s}
+#welcomeOverlay .loader span:nth-child(2){background:var(--c2);animation-delay:.15s}
+#welcomeOverlay .loader span:nth-child(3){background:var(--c3);animation-delay:.3s}
+#welcomeOverlay .loader span:nth-child(4){background:var(--c4);animation-delay:.45s}
+#welcomeOverlay .loader span:nth-child(5){background:var(--ok);animation-delay:.6s}
+@keyframes loadAnim{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+/* scrollbar global */
+::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-
-/* loading spinner */
-.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(0,245,200,.3);
-  border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* resp */
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
-  .sidebar,.right{display:none}
+::-webkit-scrollbar-thumb{background:rgba(0,245,200,.1);border-radius:2px}
+/* responsive */
+@media(max-width:768px){
+  .window{width:95vw!important;left:2.5vw!important}
+  #desktopIcons{flex-direction:row;flex-wrap:wrap;gap:4px}
+  .desktop-icon{width:60px}
+  #startMenu{width:200px}
 }
 </style>
 </head>
 <body>
+<div id="particles"></div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">CCL <span>0.1</span></div>
-  <div class="topbar-gap"></div>
-  <span class="badge b-green"><span class="dot"></span>Live</span>
-  <span class="badge b-cyan" id="badge-chain">⬡ CCL-Devnet</span>
-  <span class="badge b-mag"  id="badge-ai">◈ AI —</span>
-  <div class="topbar-sep"></div>
-  <button class="btn btn-outline btn-sm" onclick="openKeyModal()">⚿ API Key</button>
-</div>
-
-<!-- LAYOUT -->
-<div class="layout">
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="nav-sect">Workspace</div>
-  <div class="nav-item active" onclick="showTab('dashboard')"><span class="nav-icon">⬡</span> Dashboard</div>
-  <div class="nav-item" onclick="showTab('terminal')"><span class="nav-icon">▶</span> Terminal</div>
-  <div class="nav-item" onclick="showTab('projects')"><span class="nav-icon">📦</span> Projects</div>
-  <div class="nav-item" onclick="showTab('ai')"><span class="nav-icon">◈</span> AI Studio</div>
-
-  <div class="nav-sect">Tools</div>
-  <div class="nav-item" onclick="showTab('templates')"><span class="nav-icon">⚡</span> Templates</div>
-  <div class="nav-item" onclick="showTab('deploy')"><span class="nav-icon">🚀</span> Deploy</div>
-  <div class="nav-item" onclick="showTab('share')"><span class="nav-icon">↔</span> P2P Share</div>
-  <div class="nav-item" onclick="showTab('packages')"><span class="nav-icon">📦</span> Packages</div>
-
-  <div class="nav-sect">Data</div>
-  <div class="nav-item" onclick="showTab('wallet')"><span class="nav-icon">◎</span> Wallet</div>
-  <div class="nav-item" onclick="showTab('notes')"><span class="nav-icon">📝</span> Notes</div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
-    <div class="tab" id="tab-terminal"  onclick="showTab('terminal')">Terminal</div>
-    <div class="tab" id="tab-projects"  onclick="showTab('projects')">Projects</div>
-    <div class="tab" id="tab-ai"        onclick="showTab('ai')">AI Studio</div>
-    <div class="tab" id="tab-templates" onclick="showTab('templates')">Templates</div>
-    <div class="tab" id="tab-deploy"    onclick="showTab('deploy')">Deploy</div>
-    <div class="tab" id="tab-share"     onclick="showTab('share')">P2P Share</div>
-    <div class="tab" id="tab-packages"  onclick="showTab('packages')">Packages</div>
-    <div class="tab" id="tab-wallet"    onclick="showTab('wallet')">Wallet</div>
-    <div class="tab" id="tab-notes"     onclick="showTab('notes')">Notes</div>
-  </div>
-
-  <div class="panel-wrap">
-
-    <!-- ══ DASHBOARD ══ -->
-    <div class="panel active" id="panel-dashboard">
-      <div class="stats-row" id="stats-row">
-        <div class="stat"><div class="stat-lbl">Projects</div><div class="stat-val c-cyan" id="s-projects">—</div><div class="stat-sub">CCL projects</div></div>
-        <div class="stat"><div class="stat-lbl">AI Status</div><div class="stat-val c-mag" id="s-ai">—</div><div class="stat-sub">Claude API</div></div>
-        <div class="stat"><div class="stat-lbl">Wallet</div><div class="stat-val c-green" id="s-wallet">—</div><div class="stat-sub">CCL-Devnet</div></div>
-        <div class="stat"><div class="stat-lbl">Notes</div><div class="stat-val c-yellow" id="s-notes">—</div><div class="stat-sub">Saved</div></div>
-        <div class="stat"><div class="stat-lbl">Version</div><div class="stat-val c-cyan" id="s-version">0.1</div><div class="stat-sub">Genesis</div></div>
-      </div>
-
-      <div class="feat-grid">
-        <div class="feat-chip" onclick="showTab('ai');focusGenerate()"><div class="feat-chip-icon">◈</div><div class="feat-chip-name">AI Generate</div><div class="feat-chip-hint">Describe → full code</div></div>
-        <div class="feat-chip" onclick="showTab('templates')"><div class="feat-chip-icon">⚡</div><div class="feat-chip-name">Templates</div><div class="feat-chip-hint">Scaffold in seconds</div></div>
-        <div class="feat-chip" onclick="showTab('deploy')"><div class="feat-chip-icon">🚀</div><div class="feat-chip-name">Deploy</div><div class="feat-chip-hint">Surge · Vercel · GitHub</div></div>
-        <div class="feat-chip" onclick="showTab('share')"><div class="feat-chip-icon">↔</div><div class="feat-chip-name">P2P Share</div><div class="feat-chip-hint">Send files to CCL users</div></div>
-        <div class="feat-chip" onclick="showTab('wallet')"><div class="feat-chip-icon">◎</div><div class="feat-chip-name">Wallet</div><div class="feat-chip-hint">CCL-Devnet wallet</div></div>
-        <div class="feat-chip" onclick="showTab('terminal')"><div class="feat-chip-icon">▶</div><div class="feat-chip-name">Terminal</div><div class="feat-chip-hint">Full CCL shell</div></div>
-      </div>
-
-      <!-- mini terminal -->
-      <div class="term-wrap">
-        <div class="term-head"><div class="term-dots"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div></div><div class="term-title">CCL Terminal — Quick</div></div>
-        <div class="term-screen" id="term-mini"></div>
-        <div class="term-input-row">
-          <span class="t-prompt-label">CCL ›</span>
-          <input class="term-input" id="term-mini-input" placeholder="type a CCL command …" autocomplete="off" spellcheck="false">
-          <button class="term-send" onclick="runMini()">⏎</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ TERMINAL ══ -->
-    <div class="panel" id="panel-terminal">
-      <div class="term-wrap">
-        <div class="term-head"><div class="term-dots"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div></div><div class="term-title">CCL 0.1 Full Terminal</div><span class="badge b-green" style="font-size:.55rem">LIVE</span></div>
-        <div class="term-screen" id="term-full" style="height:460px"></div>
-        <div class="term-input-row">
-          <span class="t-prompt-label">CCL ›</span>
-          <input class="term-input" id="term-full-input" placeholder="help · generate · deploy · share · make wallet …" autocomplete="off" spellcheck="false">
-          <button class="term-send" onclick="runFull()">⏎</button>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-ghost btn-sm" onclick="runCmd('help')">help</button>
-        <button class="btn btn-ghost btn-sm" onclick="runCmd('make wallet')">make wallet</button>
-        <button class="btn btn-ghost btn-sm" onclick="runCmd('list projects')">list projects</button>
-        <button class="btn btn-ghost btn-sm" onclick="runCmd('show version')">version</button>
-        <button class="btn btn-ghost btn-sm" onclick="runCmd('list templates')">templates</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearTerm()">clear</button>
-      </div>
-    </div>
-
-    <!-- ══ PROJECTS ══ -->
-    <div class="panel" id="panel-projects">
-      <div class="card">
-        <div class="card-head"><div class="card-title">📦 CCL Projects</div>
-          <button class="btn btn-outline btn-sm" onclick="loadProjects()">↻ Refresh</button></div>
-        <div class="card-body">
-          <div class="inp-row" style="margin-bottom:.8rem">
-            <input class="inp" id="new-proj-name" placeholder='Project name …'>
-            <select class="inp" id="new-proj-type" style="width:130px">
-              <option value="web">web</option><option value="api">api</option>
-              <option value="web3">web3</option><option value="cli">cli</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="createProject()">Create</button>
-          </div>
-          <div id="projects-list"><div class="t-dim" style="font-size:.68rem;padding:.5rem">Loading …</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ AI STUDIO ══ -->
-    <div class="panel" id="panel-ai">
-      <div class="card">
-        <div class="card-head"><div class="card-title">◈ AI Generate — Claude API</div><span class="badge b-mag" id="ai-status-badge">checking …</span></div>
-        <div class="card-body">
-          <div class="inp-label">Describe what to build</div>
-          <textarea class="inp" id="gen-desc" rows="3" placeholder='a REST API with user auth and SQLite&#10;a web3 dApp with wallet connect&#10;a Python CLI tool for renaming files …'></textarea>
-          <div class="inp-row" style="margin-top:.6rem">
-            <input class="inp" id="gen-folder" placeholder="Output folder (optional)">
-            <button class="btn btn-primary" id="gen-btn" onclick="doGenerate()">◈ Generate</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="card-title">◈ AI Ask — Dev Q&amp;A</div></div>
-        <div class="card-body">
-          <div class="inp-row">
-            <input class="inp" id="ask-input" placeholder="how do I deploy Flask to Vercel?">
-            <button class="btn btn-outline" onclick="doAsk()">Ask</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="card-title">◈ AI Fix — Debug Code</div></div>
-        <div class="card-body">
-          <div class="inp-row">
-            <input class="inp" id="fix-file" placeholder="server.py">
-            <input class="inp" id="fix-error" placeholder="error message (optional)">
-            <button class="btn btn-outline" onclick="doFix()">Fix</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="card-title">◈ AI Agent — Task Planner</div></div>
-        <div class="card-body">
-          <div class="inp-row">
-            <input class="inp" id="agent-input" placeholder="build me a SaaS app with auth and payments …">
-            <button class="btn btn-outline" onclick="doAgent()">Plan</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ TEMPLATES ══ -->
-    <div class="panel" id="panel-templates">
-      <div class="card">
-        <div class="card-head"><div class="card-title">⚡ Project Templates</div></div>
-        <div class="card-body">
-          <div class="inp-label">Project Name</div>
-          <input class="inp" id="tpl-proj-name" placeholder="my-project" style="margin-bottom:.8rem">
-          <div id="tpl-list">
-            <div class="tpl-item" onclick="applyTemplate('web3-dapp')">
-              <div class="tpl-name">⬡ web3-dapp</div>
-              <div class="tpl-desc">Ethereum dApp + ERC20 token + Hardhat + wallet connect</div>
-              <div class="tpl-tags"><span class="tpl-tag">web3</span><span class="tpl-tag">solidity</span><span class="tpl-tag">ethereum</span></div>
-            </div>
-            <div class="tpl-item" onclick="applyTemplate('saas-starter')">
-              <div class="tpl-name">◈ saas-starter</div>
-              <div class="tpl-desc">Flask + JWT auth + SQLite + login/register + dashboard</div>
-              <div class="tpl-tags"><span class="tpl-tag">saas</span><span class="tpl-tag">flask</span><span class="tpl-tag">auth</span></div>
-            </div>
-            <div class="tpl-item" onclick="applyTemplate('api-server')">
-              <div class="tpl-name">⚡ api-server</div>
-              <div class="tpl-desc">FastAPI + CORS + Bearer auth + SQLite + auto Swagger docs</div>
-              <div class="tpl-tags"><span class="tpl-tag">api</span><span class="tpl-tag">fastapi</span><span class="tpl-tag">rest</span></div>
-            </div>
-            <div class="tpl-item" onclick="applyTemplate('cli-tool')">
-              <div class="tpl-name">🛠 cli-tool</div>
-              <div class="tpl-desc">Python CLI + argparse + config file + subcommands</div>
-              <div class="tpl-tags"><span class="tpl-tag">cli</span><span class="tpl-tag">python</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ DEPLOY ══ -->
-    <div class="panel" id="panel-deploy">
-      <div class="card">
-        <div class="card-head"><div class="card-title">🚀 Deploy Your Project</div></div>
-        <div class="card-body">
-          <div class="inp-label">Target Platform</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem">
-            <div class="tpl-item" onclick="doDeploy('surge')" style="text-align:center">
-              <div style="font-size:1.2rem;margin-bottom:.3rem">⚡</div>
-              <div class="tpl-name" style="text-align:center">Surge.sh</div>
-              <div class="tpl-desc">Free static hosting. No account needed.</div>
-            </div>
-            <div class="tpl-item" onclick="doDeploy('vercel')" style="text-align:center">
-              <div style="font-size:1.2rem;margin-bottom:.3rem">▲</div>
-              <div class="tpl-name" style="text-align:center">Vercel</div>
-              <div class="tpl-desc">Free tier. Best for Next.js / React.</div>
-            </div>
-            <div class="tpl-item" onclick="doDeploy('github')" style="text-align:center">
-              <div style="font-size:1.2rem;margin-bottom:.3rem">⬡</div>
-              <div class="tpl-name" style="text-align:center">GitHub Pages</div>
-              <div class="tpl-desc">Free static hosting from your repo.</div>
-            </div>
-            <div class="tpl-item" onclick="doDeploy('ipfs')" style="text-align:center">
-              <div style="font-size:1.2rem;margin-bottom:.3rem">🌐</div>
-              <div class="tpl-name" style="text-align:center">IPFS</div>
-              <div class="tpl-desc">Decentralised. Permanent. Web3-native.</div>
-            </div>
-          </div>
-
-          <div style="border-top:1px solid var(--border);padding-top:.8rem;margin-top:.4rem">
-            <div class="inp-label">Git Save + Push</div>
-            <div class="inp-row">
-              <input class="inp" id="save-msg" placeholder="commit message (auto-generated if empty)">
-              <button class="btn btn-green" onclick="doSave()">⬆ Save</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ P2P SHARE ══ -->
-    <div class="panel" id="panel-share">
-      <div class="card">
-        <div class="card-head"><div class="card-title">↔ P2P File Share</div><span class="badge b-cyan">LAN + Internet</span></div>
-        <div class="card-body">
-          <div style="font-size:.68rem;color:var(--dim);margin-bottom:1rem;line-height:1.7">
-            Send files directly between two CCL users. PIN-secured. SHA-256 verified.<br>
-            Works over local network or internet (port 9741).
-          </div>
-          <div class="inp-label">Send a File</div>
-          <div class="inp-row">
-            <input class="inp" id="share-file" placeholder="path/to/file.zip">
-            <input class="inp" id="share-pin" placeholder="PIN (auto if empty)" style="width:140px">
-            <button class="btn btn-primary" onclick="doShare()">Send</button>
-          </div>
-          <div id="share-result" style="margin-top:.6rem"></div>
-
-          <div style="border-top:1px solid var(--border);padding-top:.8rem;margin-top:.6rem">
-            <div class="inp-label">Receive a File</div>
-            <div class="inp-row">
-              <input class="inp" id="recv-ip"  placeholder="Sender IP (e.g. 192.168.1.5)">
-              <input class="inp" id="recv-pin" placeholder="PIN from sender" style="width:120px">
-              <button class="btn btn-outline" onclick="doReceive()">Receive</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ PACKAGES ══ -->
-    <div class="panel" id="panel-packages">
-      <div class="card">
-        <div class="card-head"><div class="card-title">📦 Package Manager</div><span class="badge b-cyan">pip + npm unified</span></div>
-        <div class="card-body">
-          <div class="inp-label">Install Packages</div>
-          <div class="inp-row">
-            <input class="inp" id="pkg-input" placeholder="flask react pandas express tailwind …">
-            <select class="inp" id="pkg-flag" style="width:110px">
-              <option value="">--save</option>
-              <option value="--dev">--dev</option>
-              <option value="--global">--global</option>
-            </select>
-            <button class="btn btn-primary" onclick="doInstall()">Install</button>
-          </div>
-          <div style="font-size:.62rem;color:var(--dim);margin-top:.4rem">
-            Auto-detects pip vs npm. Saves deps to .ccl project config.
-          </div>
-          <div class="btn-row" style="margin-top:.8rem">
-            <span style="font-size:.62rem;color:var(--dim)">Quick install:</span>
-            <button class="btn btn-ghost btn-sm" onclick="quickInstall('flask')">flask</button>
-            <button class="btn btn-ghost btn-sm" onclick="quickInstall('requests')">requests</button>
-            <button class="btn btn-ghost btn-sm" onclick="quickInstall('fastapi uvicorn')">fastapi</button>
-            <button class="btn btn-ghost btn-sm" onclick="quickInstall('react')">react</button>
-            <button class="btn btn-ghost btn-sm" onclick="quickInstall('express')">express</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ WALLET ══ -->
-    <div class="panel" id="panel-wallet">
-      <div class="card">
-        <div class="card-head"><div class="card-title">◎ CCL Wallet</div><span class="badge b-cyan" id="w-chain-badge">CCL-Devnet</span></div>
-        <div class="card-body" id="wallet-body">
-          <div style="font-size:.68rem;color:var(--dim);padding:.5rem 0">Loading wallet …</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ NOTES ══ -->
-    <div class="panel" id="panel-notes">
-      <div class="card">
-        <div class="card-head"><div class="card-title">📝 Notes</div></div>
-        <div class="card-body">
-          <div class="inp-row" style="margin-bottom:.8rem">
-            <input class="inp" id="note-input" placeholder="Quick note …">
-            <button class="btn btn-primary btn-sm" onclick="doNote()">Save</button>
-          </div>
-          <div id="notes-list"></div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /panel-wrap -->
-</div><!-- /main -->
-
-<!-- RIGHT PANEL -->
-<div class="right">
-  <div class="right-head">
-    <span>◎ Wallet + Projects</span>
-    <button class="btn btn-ghost btn-sm" onclick="loadAll()">↻</button>
-  </div>
-  <div class="right-scroll">
-
-    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Wallet</div>
-    <div id="right-wallet">
-      <button class="btn btn-outline" style="width:100%;margin-bottom:.6rem" onclick="createWallet()">+ Generate Wallet</button>
-    </div>
-
-    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin:.8rem 0 .5rem">Projects</div>
-    <div id="right-projects"></div>
-
-    <div style="font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin:.8rem 0 .5rem">Quick Commands</div>
-    <div style="display:flex;flex-direction:column;gap:.3rem">
-      <button class="btn btn-ghost btn-sm" onclick="runCmd('help')" style="text-align:left">help</button>
-      <button class="btn btn-ghost btn-sm" onclick="runCmd('list projects')" style="text-align:left">list projects</button>
-      <button class="btn btn-ghost btn-sm" onclick="runCmd('show version')" style="text-align:left">version</button>
-      <button class="btn btn-ghost btn-sm" onclick="runCmd('make wallet')" style="text-align:left">make wallet</button>
-    </div>
-
+<!-- WELCOME SCREEN -->
+<div id="welcomeOverlay">
+  <div class="content">
+    <h1>⬡ CCL</h1>
+    <div class="sub">C A P E C H A I N &nbsp; L A B S</div>
+    <div class="tag">OMNIA · AI-NATIVE OPERATING SYSTEM</div>
+    <div class="loader"><span></span><span></span><span></span><span></span><span></span></div>
   </div>
 </div>
 
-</div><!-- /layout -->
+<!-- DESKTOP -->
+<div id="desktop">
+  <!-- Desktop Icons -->
+  <div id="desktopIcons">
+    <div class="desktop-icon" onclick="openWindow('terminal')"><div class="icon">⬢</div><div class="label">Terminal</div></div>
+    <div class="desktop-icon" onclick="openWindow('files')"><div class="icon">📁</div><div class="label">Files</div></div>
+    <div class="desktop-icon" onclick="openWindow('todo')"><div class="icon">✓</div><div class="label">Todo</div></div>
+    <div class="desktop-icon" onclick="openWindow('notes')"><div class="icon">📝</div><div class="label">Notes</div></div>
+    <div class="desktop-icon" onclick="openWindow('monitor')"><div class="icon">📊</div><div class="label">Monitor</div></div>
+    <div class="desktop-icon" onclick="openWindow('projects')"><div class="icon">◆</div><div class="label">Projects</div></div>
+    <div class="desktop-icon" onclick="openWindow('providers')"><div class="icon">◈</div><div class="label">AI</div></div>
+    <div class="desktop-icon" onclick="openWindow('wallet')"><div class="icon">◎</div><div class="label">Wallet</div></div>
+    <div class="desktop-icon" onclick="openWindow('settings')"><div class="icon">⚙</div><div class="label">Settings</div></div>
+  </div>
 
-<!-- TOASTS -->
-<div class="toast-wrap" id="toasts"></div>
+  <!-- WINDOWS CONTAINER -->
+  <div id="windows"></div>
 
-<!-- API KEY MODAL -->
-<div class="modal-bg" id="key-modal">
-  <div class="modal">
-    <div class="modal-title">⚿ Anthropic API Key</div>
-    <div class="modal-desc">
-      Required for AI features: generate, fix, explain, agent, ask.<br>
-      Get a free key at <strong style="color:var(--cyan)">console.anthropic.com</strong><br>
-      Key is saved locally in config/ccl_config.json.
+  <!-- START MENU -->
+  <div id="startMenu">
+    <div class="start-item" onclick="openWindow('terminal');toggleStart()"><span>⬢</span> Terminal</div>
+    <div class="start-item" onclick="openWindow('files');toggleStart()"><span>📁</span> File Manager</div>
+    <div class="start-item" onclick="openWindow('todo');toggleStart()"><span>✓</span> Todo List</div>
+    <div class="start-item" onclick="openWindow('notes');toggleStart()"><span>📝</span> Notes</div>
+    <div class="start-item" onclick="openWindow('monitor');toggleStart()"><span>📊</span> System Monitor</div>
+    <div class="start-item" onclick="openWindow('projects');toggleStart()"><span>◆</span> Projects</div>
+    <div class="start-item" onclick="openWindow('providers');toggleStart()"><span>◈</span> AI Providers</div>
+    <div class="start-item" onclick="openWindow('wallet');toggleStart()"><span>◎</span> Wallet</div>
+    <div class="start-item" onclick="openWindow('settings');toggleStart()"><span>⚙</span> Settings</div>
+    <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:4px;padding-top:4px">
+      <div class="start-item" onclick="runCCL('help');toggleStart()"><span>?</span> Quick Help</div>
+      <div class="start-item" onclick="runCCL('neofetch');toggleStart()"><span>⬡</span> System Info</div>
     </div>
-    <input class="inp" id="key-input" type="password" placeholder="sk-ant-api03-…" style="margin-bottom:.7rem">
-    <div class="modal-row">
-      <button class="btn btn-primary" onclick="saveKey()" style="flex:1">Save Key</button>
-      <button class="btn btn-ghost" onclick="closeKeyModal()">Cancel</button>
-    </div>
+  </div>
+
+  <!-- TASKBAR -->
+  <div id="taskbar">
+    <button id="startBtn" onclick="toggleStart()"><span class="g">⬡ CCL</span></button>
+    <div class="taskbar-sep"></div>
+    <div class="taskbar-items" id="taskbarItems"></div>
+    <div class="taskbar-sep"></div>
+    <div id="trayIcon" title="AI Status" onclick="openWindow('providers')">⬡</div>
+    <span id="taskbarClock"></span>
   </div>
 </div>
 
 <script>
-// ── STATE ────────────────────────────────────────────────────────────────────
-let lastOutputTime = 0;
-let sseSource      = null;
-let termHistory    = [];
-let termHistIdx    = -1;
+// ── Particles ──
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');p.className='p';
+    p.style.left=Math.random()*100+'%';
+    p.style.width=p.style.height=(1+Math.random()*3)+'px';
+    p.style.animationDuration=(10+Math.random()*25)+'s';
+    p.style.animationDelay=(Math.random()*20)+'s';
+    p.style.background=`rgba(0,${200+Math.floor(Math.random()*55)},${150+Math.floor(Math.random()*105)},${.15+Math.random()*.3})`;
+    c.appendChild(p);
+  }
+})();
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-window.addEventListener('load', () => {
-  loadAll();
-  connectSSE();
-  setupInputs();
+// ── State ──
+let windows={};
+let winIdCounter=0;
+let lastTime=0;
+let termLines=[];
+let dragging={win:null,ox:0,oy:0,ex:0,ey:0};
+
+// ── Clock ──
+function updateClock(){
+  const d=new Date();
+  document.getElementById('taskbarClock').textContent=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock,1000);updateClock();
+
+// ── API ──
+async function api(url,data){
+  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data||{})});return await r.json()}
+  catch(e){return{error:e.message}}
+}
+async function apiGet(url){
+  try{const r=await fetch(url);return await r.json()}
+  catch(e){return{}}
+}
+
+// ── Window System ──
+const winDefs={
+  terminal:{title:'Terminal — CCL',icon:'⬢',w:600,h:340,defX:80,defY:60},
+  files:{title:'File Manager',icon:'📁',w:500,h:360,defX:140,defY:100},
+  todo:{title:'Todo List',icon:'✓',w:380,h:340,defX:200,defY:80},
+  notes:{title:'Notes',icon:'📝',w:380,h:340,defX:260,defY:120},
+  monitor:{title:'System Monitor',icon:'📊',w:420,h:320,defX:100,defY:140},
+  projects:{title:'Projects',icon:'◆',w:420,h:320,defX:180,defY:100},
+  providers:{title:'AI Providers',icon:'◈',w:400,h:360,defX:120,defY:80},
+  wallet:{title:'CCL Wallet',icon:'◎',w:380,h:280,defX:220,defY:160},
+  settings:{title:'Settings',icon:'⚙',w:400,h:340,defX:160,defY:120},
+};
+
+function openWindow(type){
+  if(windows[type]&&windows[type].el){
+    focusWindow(type);return
+  }
+  const def=winDefs[type];
+  if(!def)return;
+  const id='win_'+(++winIdCounter);
+  const el=document.createElement('div');el.className='window';el.id=id;
+  const w=Math.min(def.w,window.innerWidth-40),h=Math.min(def.h,window.innerHeight-100);
+  const x=Math.min(def.defX,window.innerWidth-w-20),y=Math.min(def.defY,window.innerHeight-h-80);
+  el.style.cssText=`width:${w}px;height:${h}px;left:${x}px;top:${y}px`;
+  if(type==='terminal')el.classList.add('term-win');
+  el.innerHTML=`
+    <div class="win-header" onmousedown="startDrag(event,'${id}')">
+      <div class="win-dots">
+        <div class="win-dot r" onclick="closeWindow('${type}')"></div>
+        <div class="win-dot y" onclick="minWindow('${id}')"></div>
+        <div class="win-dot g" onclick="maxWindow('${id}')"></div>
+      </div>
+      <div class="win-title">${def.icon} ${def.title}</div>
+    </div>
+    <div class="win-body" id="${id}_body">Loading...</div>`;
+  document.getElementById('windows').appendChild(el);
+  windows[type]={el,id,type};
+  focusWindow(type);
+  updateTaskbar();
+  renderWinContent(type,id);
+}
+
+function closeWindow(type){
+  if(!windows[type])return;
+  const w=windows[type];
+  w.el.remove();
+  const tb=document.querySelector(`.taskbar-item[data-win="${type}"]`);
+  if(tb)tb.remove();
+  delete windows[type];
+}
+
+function focusWindow(type){
+  if(!windows[type])return;
+  const w=windows[type];
+  w.el.style.zIndex=50+(++winIdCounter);
+  w.el.style.borderColor='rgba(0,245,200,.25)';
+  Object.keys(windows).forEach(k=>{
+    if(k!==type&&windows[k].el)windows[k].el.style.borderColor='rgba(0,245,200,.08)';
+  });
+  document.querySelectorAll('.taskbar-item').forEach(e=>e.classList.remove('active'));
+  const tb=document.querySelector(`.taskbar-item[data-win="${type}"]`);
+  if(tb)tb.classList.add('active');
+}
+
+function minWindow(id){
+  const el=document.getElementById(id);
+  if(el)el.style.display='none';
+}
+function maxWindow(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(el.style.width==='100%'){
+    el.style.width='';el.style.height='';el.style.left='';el.style.top='';
+  }else{
+    el.style.width='100%';el.style.height='100%';el.style.left='0';el.style.top='0';
+  }
+}
+
+// ── Drag ──
+function startDrag(e,id){
+  const el=document.getElementById(id);if(!el)return;
+  const r=el.getBoundingClientRect();
+  dragging={win:id,ox:e.clientX-r.left,oy:e.clientY-r.top,ex:e.clientX,ey:e.clientY};
+  document.addEventListener('mousemove',onDrag);
+  document.addEventListener('mouseup',stopDrag);
+}
+function onDrag(e){
+  if(!dragging.win)return;
+  const el=document.getElementById(dragging.win);if(!el)return;
+  el.style.left=(e.clientX-dragging.ox)+'px';
+  el.style.top=(e.clientY-dragging.oy)+'px';
+}
+function stopDrag(){dragging={win:null};document.removeEventListener('mousemove',onDrag);document.removeEventListener('mouseup',stopDrag);}
+
+// ── Taskbar ──
+function updateTaskbar(){
+  const tb=document.getElementById('taskbarItems');tb.innerHTML='';
+  Object.keys(windows).forEach(k=>{
+    const def=winDefs[k];if(!def)return;
+    const d=document.createElement('div');d.className='taskbar-item';d.dataset.win=k;
+    d.textContent=def.icon+' '+def.title.split('—')[0].trim();
+    d.onclick=()=>{
+      const w=windows[k];
+      if(w.el.style.display==='none'){w.el.style.display='';focusWindow(k)}
+      else focusWindow(k);
+    };
+    tb.appendChild(d);
+  });
+}
+
+// ── Render Window Content ──
+async function renderWinContent(type,id){
+  const body=document.getElementById(id+'_body');if(!body)return;
+  switch(type){
+    case 'terminal':renderTerminal(body,id);break;
+    case 'files':renderFiles(body);break;
+    case 'todo':renderTodo(body);break;
+    case 'notes':renderNotes(body);break;
+    case 'monitor':renderMonitor(body);break;
+    case 'projects':renderProjects(body);break;
+    case 'providers':renderProviders(body);break;
+    case 'wallet':renderWallet(body);break;
+    case 'settings':renderSettings(body);break;
+  }
+}
+
+// ── TERMINAL ──
+function renderTerminal(body,id){
+  body.innerHTML=`
+    <div class="term-output" id="${id}_output">
+      <div class="l out">⬡ CCL OMNIA Terminal ready.</div>
+      <div class="l out">Type a command or click Quick Actions.</div>
+    </div>
+    <div class="term-input-row">
+      <span class="term-prompt">⬡ ›</span>
+      <input class="term-input" id="${id}_input" placeholder="type a command..." autofocus
+        onkeydown="if(event.key==='Enter'){submitTerm('${id}')}">`;
+  setTimeout(()=>{
+    const inp=document.getElementById(id+'_input');
+    if(inp)inp.focus();
+  },100);
+}
+window.submitTerm=function(id){
+  const input=document.getElementById(id+'_input');
+  if(!input)return;
+  const cmd=input.value.trim();if(!cmd)return;
+  addTermLine(id,'› '+cmd,'cmd');
+  input.value='';
+  api('/api/run',{command:cmd});
+};
+function addTermLine(id,text,type){
+  const out=document.getElementById(id+'_output');
+  if(!out)return;
+  const d=document.createElement('div');d.className='l '+type;
+  d.textContent=text;out.appendChild(d);out.scrollTop=out.scrollHeight;
+}
+
+// ── FILES ──
+async function renderFiles(body){
+  const data=await apiGet('/api/files');
+  let html=`<div style="margin-bottom:8px;font-size:.65rem;color:var(--dim)">CCL Home — ${data.length} files</div>`;
+  html+=data.map(f=>`<div class="todo-item" style="cursor:default"><span style="font-size:.8rem">📄</span><span>${f.name}</span><span style="margin-left:auto;color:var(--dim);font-size:.6rem">${(f.size/1024).toFixed(1)}KB</span></div>`).join('');
+  html+=`<div style="margin-top:10px;display:flex;gap:6px">
+    <input type="text" id="fileName" placeholder="filename.ext" style="flex:1">
+    <button onclick="createFile()">Create</button>
+  </div>`;
+  body.innerHTML=html;
+}
+window.createFile=async function(){
+  const name=document.getElementById('fileName').value.trim();
+  if(!name)return;
+  await api('/api/file/write',{path:name,content:'// Created by CCL\n'});
+  renderFiles(document.querySelector('.window:last-child .win-body'));
+};
+
+// ── TODO ──
+async function renderTodo(body){
+  const todos=await apiGet('/api/todos');
+  let html=`<div style="margin-bottom:6px;display:flex;gap:6px">
+    <input type="text" id="todoInput" placeholder="add task..." style="flex:1" onkeydown="if(event.key==='Enter')addTodo()">
+    <button onclick="addTodo()">Add</button>
+  </div>`;
+  if(todos.length===0)html+=`<div style="color:var(--dim);padding:12px 0;text-align:center;font-size:.65rem">No tasks. Add one above!</div>`;
+  else todos.forEach((t,i)=>{
+    html+=`<div class="todo-item">
+      <div class="todo-cb ${t.done?'done':''}" onclick="toggleTodo(${i})"></div>
+      <span class="todo-text ${t.done?'done':''}">${t.text}</span>
+      <span style="font-size:.55rem;color:var(--dim)">${t.time||''}</span>
+      <span class="todo-del" onclick="delTodo(${i})">✕</span>
+    </div>`;
+  });
+  html+=`<div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end">
+    <button onclick="clearTodos()" style="background:rgba(255,68,102,.1);border-color:rgba(255,68,102,.2)">Clear All</button>
+  </div>`;
+  body.innerHTML=html;
+}
+window.addTodo=async function(){
+  const inp=document.getElementById('todoInput');if(!inp||!inp.value.trim())return;
+  await api('/api/todo',{action:'add',text:inp.value.trim()});inp.value='';
+  renderTodo(document.querySelector('.window:last-child .win-body'));
+};
+window.toggleTodo=async function(i){
+  await api('/api/todo',{action:'done',index:i});
+  renderTodo(document.querySelector('.window:last-child .win-body'));
+};
+window.delTodo=async function(i){
+  await api('/api/todo',{action:'remove',index:i});
+  renderTodo(document.querySelector('.window:last-child .win-body'));
+};
+window.clearTodos=async function(){
+  await api('/api/todo',{action:'clear'});
+  renderTodo(document.querySelector('.window:last-child .win-body'));
+};
+
+// ── NOTES ──
+async function renderNotes(body){
+  const notes=await apiGet('/api/notes');
+  let html=`<div style="margin-bottom:6px;display:flex;gap:6px">
+    <input type="text" id="noteInput" placeholder="write a note..." style="flex:1" onkeydown="if(event.key==='Enter')addNote()">
+    <button onclick="addNote()">Save</button>
+  </div>`;
+  if(notes.length===0)html+=`<div style="color:var(--dim);padding:12px 0;text-align:center;font-size:.65rem">No notes yet.</div>`;
+  else [...notes].reverse().forEach(n=>{
+    html+=`<div class="note-item"><span class="note-time">[${n.time}]</span><span>${n.text}</span></div>`;
+  });
+  body.innerHTML=html;
+}
+window.addNote=async function(){
+  const inp=document.getElementById('noteInput');
+  if(!inp||!inp.value.trim())return;
+  await api('/api/note',{text:inp.value.trim()});inp.value='';
+  renderNotes(document.querySelector('.window:last-child .win-body'));
+};
+
+// ── MONITOR ──
+async function renderMonitor(body){
+  const s=await apiGet('/api/sysinfo');
+  if(s.error){body.innerHTML=`<div style="color:var(--err)">${s.error}</div>`;return}
+  const ok='#39ff87';
+  const cpuC=s.cpu<50?ok:s.cpu<80?'#ffd700':'#ff4466';
+  const memC=s.ram_pct<50?ok:s.ram_pct<80?'#ffd700':'#ff4466';
+  const diskC=s.disk_pct<50?ok:s.disk_pct<80?'#ffd700':'#ff4466';
+  body.innerHTML=`
+    <div class="sys-grid">
+      <div class="sys-metric"><div class="val" style="color:${cpuC}">${s.cpu}%</div><div class="lbl">CPU</div><div class="bar-bg"><div class="bar-fill" style="width:${s.cpu}%;background:${cpuC}"></div></div></div>
+      <div class="sys-metric"><div class="val" style="color:${memC}">${s.ram_used}/${s.ram_total}GB</div><div class="lbl">RAM ${s.ram_pct}%</div><div class="bar-bg"><div class="bar-fill" style="width:${s.ram_pct}%;background:${memC}"></div></div></div>
+      <div class="sys-metric"><div class="val" style="color:${diskC}">${s.disk_used}/${s.disk_total}GB</div><div class="lbl">DISK ${s.disk_pct}%</div><div class="bar-bg"><div class="bar-fill" style="width:${s.disk_pct}%;background:${diskC}"></div></div></div>
+      <div class="sys-metric"><div class="val" style="color:#00f5c8">${s.uptime||'?'}</div><div class="lbl">UPTIME</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:.65rem;color:var(--dim);display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div>Host: ${s.hostname}</div>
+      <div>Cores: ${s.cpu_cores}</div>
+      <div>Python: ${s.python}</div>
+      <div>Processes: ${s.processes}</div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <button onclick="runCCL('sysinfo')">Detailed Info</button>
+      <button onclick="runCCL('neofetch')">Neofetch</button>
+      <button onclick="runCCL('ip')">Network</button>
+    </div>`;
+}
+
+// ── PROJECTS ──
+async function renderProjects(body){
+  const p=await apiGet('/api/projects');
+  let html=`<div style="margin-bottom:8px;display:flex;gap:6px">
+    <input type="text" id="projName" placeholder="project name" style="flex:1" onkeydown="if(event.key==='Enter')createProject()">
+    <select id="projType"><option value="basic">Basic</option><option value="web">Web</option><option value="api">API</option><option value="contract">Contract</option></select>
+    <button onclick="createProject()">Create</button>
+  </div>`;
+  if(p.length===0)html+=`<div style="color:var(--dim);padding:12px 0;text-align:center;font-size:.65rem">No projects yet.</div>`;
+  else p.forEach(pr=>{
+    html+=`<div class="proj-item"><span class="proj-icon">◆</span><span>${pr.name}</span><span style="color:var(--dim);margin-left:auto;font-size:.6rem">${pr.type}</span></div>`;
+  });
+  body.innerHTML=html;
+}
+window.createProject=async function(){
+  const name=document.getElementById('projName');
+  const type=document.getElementById('projType');
+  if(!name||!name.value.trim())return;
+  await api('/api/create/project',{name:name.value.trim(),type:type.value});
+  name.value='';
+  renderProjects(document.querySelector('.window:last-child .win-body'));
+  runCCL(`echo "Project ${name.value} created"`);
+};
+
+// ── PROVIDERS ──
+async function renderProviders(body){
+  const cfg=await apiGet('/api/config');
+  const provs=[
+    {id:'ollama',name:'Ollama',on:true},
+    {id:'gemini',name:'Gemini (free)',on:cfg.providers?.gemini},
+    {id:'groq',name:'Groq (free)',on:cfg.providers?.groq},
+    {id:'openai',name:'OpenAI',on:cfg.providers?.openai},
+    {id:'claude',name:'Claude',on:cfg.providers?.claude},
+    {id:'deepseek',name:'DeepSeek',on:cfg.providers?.deepseek},
+    {id:'openrouter',name:'OpenRouter',on:cfg.providers?.openrouter},
+  ];
+  let html=`<div style="margin-bottom:8px;display:flex;gap:6px">
+    <select id="provSelect" style="flex:1">
+      <option value="gemini">Gemini (free)</option>
+      <option value="groq">Groq (free)</option>
+      <option value="openai">OpenAI</option>
+      <option value="claude">Claude</option>
+      <option value="deepseek">DeepSeek</option>
+      <option value="openrouter">OpenRouter</option>
+      <option value="mistral">Mistral</option>
+    </select>
+    <input type="text" id="provKey" placeholder="sk-..." style="flex:2" onkeydown="if(event.key==='Enter')setProvKey()">
+    <button onclick="setProvKey()">Save</button>
+  </div>`;
+  provs.forEach(p=>{
+    html+=`<div class="prov-item"><div class="prov-dot ${p.on?'prov-on':'prov-off'}"></div><span>${p.name}</span><span style="margin-left:auto;color:var(--dim);font-size:.6rem">${p.on?'✓ ready':'no key'}</span></div>`;
+  });
+  html+=`<div style="margin-top:8px"><button onclick="runCCL('ai')" style="width:100%">Show All 53 Providers</button></div>`;
+  body.innerHTML=html;
+}
+window.setProvKey=async function(){
+  const sel=document.getElementById('provSelect');const key=document.getElementById('provKey');
+  if(!key||!key.value.trim())return;
+  await api('/api/setkey',{provider:sel.value,key:key.value.trim()});
+  key.value='';
+  renderProviders(document.querySelector('.window:last-child .win-body'));
+  addTermLine(Object.keys(windows).find(k=>windows[k]?.type==='terminal')?.['id']||'','✓ '+sel.value+' key saved','ok');
+};
+
+// ── WALLET ──
+async function renderWallet(body){
+  const w=await apiGet('/api/wallet');
+  if(!w.address){
+    body.innerHTML=`<div style="text-align:center;padding:20px"><div style="font-size:2rem;margin-bottom:10px">◎</div>
+      <div style="color:var(--dim);margin-bottom:12px;font-size:.75rem">No wallet yet</div>
+      <button onclick="createWallet()">Create Wallet</button></div>`;
+    return;
+  }
+  body.innerHTML=`
+    <div style="display:grid;gap:8px">
+      <div class="todo-item" style="cursor:default"><span style="color:var(--dim)">Address</span><span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;word-break:break-all">${w.address}</span></div>
+      <div class="todo-item" style="cursor:default"><span style="color:var(--dim)">Balance</span><span style="font-size:.8rem;color:var(--ok)">${w.balance}</span></div>
+      <div class="todo-item" style="cursor:default"><span style="color:var(--dim)">Chain</span><span>${w.chain}</span></div>
+      <div class="todo-item" style="cursor:default"><span style="color:var(--dim)">Created</span><span>${w.created}</span></div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <button onclick="createWallet()">New Wallet</button>
+      <button onclick="runCCL('show wallet')">Show in Terminal</button>
+    </div>`;
+}
+window.createWallet=async function(){
+  const r=await api('/api/wallet/create',{});
+  renderWallet(document.querySelector('.window:last-child .win-body'));
+};
+
+// ── SETTINGS ──
+function renderSettings(body){
+  body.innerHTML=`
+    <div class="setting-row"><span>Theme</span>
+      <select id="themeSelect" onchange="setTheme()">
+        <option value="cyber">Neon Cyber</option>
+        <option value="sunset">Sunset Glow</option>
+        <option value="matrix">Matrix Code</option>
+        <option value="dragonskin">Dragonskin</option>
+        <option value="ocean">Deep Ocean</option>
+        <option value="midnight">Midnight Aurora</option>
+      </select>
+    </div>
+    <div class="setting-row"><span>Dashboard Style</span>
+      <select id="wallSelect" onchange="setWallpaper()">
+        <option value="mesh">Mesh Gradient</option>
+        <option value="dark">Dark Solid</option>
+        <option value="ocean">Ocean Depth</option>
+        <option value="sunset">Sunset</option>
+      </select>
+    </div>
+    <div class="setting-row"><span>Terminal Font Size</span>
+      <select id="fontSelect" onchange="setFontSize()">
+        <option value=".6rem">Small</option>
+        <option value=".68rem" selected>Default</option>
+        <option value=".75rem">Large</option>
+      </select>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="setting-row"><span style="color:var(--c1)">⬡ CCL OMNIA</span><span style="color:var(--dim);font-size:.6rem">v0.3</span></div>
+      <div class="setting-row"><span style="color:var(--dim);font-size:.6rem">CapeChain Labs</span></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:6px">
+      <button onclick="runCCL('version')">Version Info</button>
+      <button onclick="runCCL('help')">Full Help</button>
+    </div>`;
+}
+window.setTheme=function(){
+  const v=document.getElementById('themeSelect').value;
+  runCCL('theme '+v);
+};
+window.setWallpaper=function(){
+  const v=document.getElementById('wallSelect').value;
+  const colors={mesh:'',dark:'#080820',ocean:'#051020',sunset:'#1a0810'};
+  document.getElementById('desktop').style.background=colors[v]||'';
+};
+window.setFontSize=function(){
+  const v=document.getElementById('fontSelect').value;
+  document.querySelectorAll('.term-output').forEach(e=>e.style.fontSize=v);
+  document.querySelectorAll('.term-input').forEach(e=>e.style.fontSize=v);
+};
+
+// ── Quick Run ──
+window.runCCL=function(cmd){
+  api('/api/run',{command:cmd});
+  // find terminal window
+  for(const k in windows){
+    if(windows[k].type==='terminal'){
+      addTermLine(windows[k].id,'› '+cmd,'cmd');
+    }
+  }
+};
+
+// ── SSE Terminal Output ──
+function connectOutput(){
+  const ev=new EventSource('/api/output?since='+lastTime);
+  ev.onmessage=e=>{
+    try{
+      const d=JSON.parse(e.data);lastTime=d.t;
+      for(const k in windows){
+        if(windows[k].type==='terminal')addTermLine(windows[k].id,d.text,'out');
+      }
+    }catch(e){}
+  };
+  ev.onerror=()=>{ev.close();setTimeout(connectOutput,2000)};
+}
+
+// ── Start Menu ──
+window.toggleStart=function(){
+  const m=document.getElementById('startMenu');
+  m.style.display=m.style.display==='block'?'none':'block';
+};
+document.addEventListener('click',e=>{
+  const m=document.getElementById('startMenu');
+  if(m.style.display==='block'&&!e.target.closest('#startMenu')&&!e.target.closest('#startBtn'))
+    m.style.display='none';
 });
 
-function loadAll() {
-  loadStats();
-  loadProjects();
-  loadWallet();
-  loadNotes();
-}
-
-// ── SSE — real-time terminal output ──────────────────────────────────────────
-function connectSSE() {
-  if (sseSource) sseSource.close();
-  sseSource = new EventSource('/api/output?since=' + lastOutputTime);
-  sseSource.onmessage = (e) => {
-    const line = JSON.parse(e.data);
-    if (line.text === undefined) return;
-    lastOutputTime = line.t;
-    appendOutput(line.text);
-  };
-  sseSource.onerror = () => {
-    setTimeout(connectSSE, 2000);
-  };
-}
-
-function appendOutput(text) {
-  const miniTerm = document.getElementById('term-mini');
-  const fullTerm = document.getElementById('term-full');
-  const line = colorLine(text);
-  if (miniTerm) { miniTerm.innerHTML += line + '\n'; miniTerm.scrollTop = 9999; }
-  if (fullTerm) { fullTerm.innerHTML += line + '\n'; fullTerm.scrollTop = 9999; }
-}
-
-function colorLine(text) {
-  const t = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  if (t.startsWith('›'))          return `<span class="t-cmd-line">${t}</span>`;
-  if (t.includes('✓'))            return `<span class="t-ok">${t}</span>`;
-  if (t.includes('→'))            return `<span class="t-info">${t}</span>`;
-  if (t.includes('◈'))            return `<span class="t-ai">${t}</span>`;
-  if (t.includes('⚠'))            return `<span class="t-warn">${t}</span>`;
-  if (t.includes('✗'))            return `<span class="t-err">${t}</span>`;
-  if (t.trim().startsWith('//'))  return `<span class="t-dim">${t}</span>`;
-  return `<span class="t-prompt-line">${t}</span>`;
-}
-
-// ── STATS ─────────────────────────────────────────────────────────────────────
-async function loadStats() {
-  try {
-    const r = await fetch('/api/stats');
-    const s = await r.json();
-    document.getElementById('s-projects').textContent = s.projects;
-    document.getElementById('s-ai').textContent       = s.ai_ready ? 'Ready' : 'No Key';
-    document.getElementById('s-wallet').textContent   = s.wallet   ? 'Active' : 'None';
-    document.getElementById('s-notes').textContent    = s.notes;
-    document.getElementById('s-version').textContent  = s.version;
-    document.getElementById('badge-ai').textContent   = s.ai_ready ? '◈ AI Ready' : '◈ AI —';
-    document.getElementById('badge-ai').className     = 'badge ' + (s.ai_ready ? 'b-mag' : 'b-red');
-    const aiBadge = document.getElementById('ai-status-badge');
-    if (aiBadge) {
-      aiBadge.textContent = s.ai_ready ? 'API Key ✓' : 'No API Key';
-      aiBadge.className   = 'badge ' + (s.ai_ready ? 'b-green' : 'b-red');
-    }
-  } catch(e) {}
-}
-
-// ── PROJECTS ─────────────────────────────────────────────────────────────────
-async function loadProjects() {
-  try {
-    const r = await fetch('/api/projects');
-    const projects = await r.json();
-    renderProjects(projects);
-  } catch(e) {}
-}
-
-function renderProjects(projects) {
-  const list = document.getElementById('projects-list');
-  const right = document.getElementById('right-projects');
-  if (!projects.length) {
-    if (list)  list.innerHTML  = '<div class="t-dim" style="font-size:.68rem;padding:.5rem">No CCL projects yet. Create one above.</div>';
-    if (right) right.innerHTML = '<div class="t-dim" style="font-size:.62rem">No projects yet</div>';
-    return;
-  }
-  const html = projects.map(p => `
-    <div class="proj-item">
-      <div class="proj-name">⬡ ${p.name}</div>
-      <div class="proj-meta">type: ${p.type} · v${p.version}${p.deps.length ? ' · ' + p.deps.join(', ') : ''}</div>
-    </div>`).join('');
-  if (list)  list.innerHTML  = html;
-  if (right) right.innerHTML = html;
-}
-
-// ── WALLET ────────────────────────────────────────────────────────────────────
-async function loadWallet() {
-  try {
-    const r = await fetch('/api/wallet');
-    const w = await r.json();
-    renderWallet(w);
-  } catch(e) {}
-}
-
-function renderWallet(w) {
-  const body  = document.getElementById('wallet-body');
-  const right = document.getElementById('right-wallet');
-  if (!w || !w.address) {
-    const html = '<button class="btn btn-outline" style="width:100%;margin-bottom:.6rem" onclick="createWallet()">+ Generate Wallet</button>';
-    if (body)  body.innerHTML  = html;
-    if (right) right.innerHTML = html;
-    return;
-  }
-  const html = `
-    <div class="wallet-addr">${w.address}</div>
-    <div class="w-row"><span class="wk">Balance</span><span class="wv" style="color:var(--cyan)">${w.balance}</span></div>
-    <div class="w-row"><span class="wk">Chain</span><span class="wv">${w.chain}</span></div>
-    <div class="w-row"><span class="wk">Created</span><span class="wv">${w.created?.slice(0,16) || '—'}</span></div>
-    <div class="btn-row"><button class="btn btn-outline btn-sm" onclick="createWallet()">New Wallet</button></div>`;
-  if (body)  body.innerHTML  = html;
-  if (right) right.innerHTML = html;
-}
-
-async function createWallet() {
-  const r = await fetch('/api/wallet/create', {method:'POST'});
-  const w = await r.json();
-  renderWallet(w);
-  loadStats();
-  toast('Wallet created!', 'ok');
-}
-
-// ── NOTES ─────────────────────────────────────────────────────────────────────
-async function loadNotes() {
-  try {
-    const r = await fetch('/api/notes');
-    const notes = await r.json();
-    renderNotes(notes);
-  } catch(e) {}
-}
-
-function renderNotes(notes) {
-  const el = document.getElementById('notes-list');
-  if (!el) return;
-  if (!notes.length) { el.innerHTML = '<div class="t-dim" style="font-size:.68rem">No notes yet.</div>'; return; }
-  el.innerHTML = [...notes].reverse().slice(0,20).map(n => `
-    <div class="note-item">
-      <div class="note-time">${n.time}</div>
-      <div class="note-text">${n.text}</div>
-    </div>`).join('');
-}
-
-// ── COMMAND RUNNER ────────────────────────────────────────────────────────────
-async function runCmd(cmd) {
-  await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({command: cmd})});
-  setTimeout(() => { loadStats(); loadProjects(); loadWallet(); loadNotes(); }, 1200);
-}
-
-async function runMini() {
-  const inp = document.getElementById('term-mini-input');
-  const cmd = inp.value.trim(); if (!cmd) return;
-  inp.value = '';
-  await runCmd(cmd);
-  showTab('dashboard');
-}
-
-async function runFull() {
-  const inp = document.getElementById('term-full-input');
-  const cmd = inp.value.trim(); if (!cmd) return;
-  termHistory.unshift(cmd); termHistIdx = -1;
-  inp.value = '';
-  await runCmd(cmd);
-}
-
-function clearTerm() {
-  document.getElementById('term-mini').innerHTML = '';
-  document.getElementById('term-full').innerHTML = '';
-}
-
-// ── AI ACTIONS ────────────────────────────────────────────────────────────────
-function focusGenerate() { setTimeout(() => document.getElementById('gen-desc')?.focus(), 100); }
-
-async function doGenerate() {
-  const desc   = document.getElementById('gen-desc').value.trim();
-  const folder = document.getElementById('gen-folder').value.trim();
-  if (!desc) { toast('Describe what to build', 'err'); return; }
-  const btn = document.getElementById('gen-btn');
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Generating …';
-  await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({description: desc, folder: folder || undefined})});
-  toast('AI generation started — check terminal', 'ok');
-  showTab('terminal');
-  setTimeout(() => { btn.disabled=false; btn.textContent='◈ Generate'; loadProjects(); }, 3000);
-}
-
-async function doAsk() {
-  const q = document.getElementById('ask-input').value.trim();
-  if (!q) return;
-  await runCmd(`ask "${q}"`);
-  showTab('terminal');
-}
-
-async function doFix() {
-  const f = document.getElementById('fix-file').value.trim();
-  const e = document.getElementById('fix-error').value.trim();
-  if (!f) { toast('Provide a filename', 'err'); return; }
-  await runCmd(`fix "${f}"${e ? ` "${e}"` : ''}`);
-  showTab('terminal');
-}
-
-async function doAgent() {
-  const t = document.getElementById('agent-input').value.trim();
-  if (!t) return;
-  await runCmd(`agent "${t}"`);
-  showTab('terminal');
-}
-
-// ── TEMPLATES ─────────────────────────────────────────────────────────────────
-async function applyTemplate(name) {
-  const proj = document.getElementById('tpl-proj-name').value.trim() || (name + '-project');
-  await fetch('/api/template', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({template: name, project: proj})});
-  toast(`Template '${name}' applied as '${proj}'`, 'ok');
-  showTab('terminal');
-  setTimeout(loadProjects, 2000);
-}
-
-// ── DEPLOY ────────────────────────────────────────────────────────────────────
-async function doDeploy(target) {
-  await fetch('/api/deploy', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({target})});
-  toast(`Deploying to ${target} …`, 'ok');
-  showTab('terminal');
-}
-
-async function doSave() {
-  const msg = document.getElementById('save-msg').value.trim();
-  await fetch('/api/save', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({message: msg})});
-  toast('Saving …', 'ok');
-  showTab('terminal');
-}
-
-// ── SHARE ─────────────────────────────────────────────────────────────────────
-async function doShare() {
-  const file = document.getElementById('share-file').value.trim();
-  const pin  = document.getElementById('share-pin').value.trim();
-  if (!file) { toast('Enter a file path', 'err'); return; }
-  await runCmd(`share "${file}"${pin ? ` "${pin}"` : ''}`);
-  showTab('terminal');
-  document.getElementById('share-result').innerHTML =
-    `<div style="font-size:.67rem;color:var(--cyan)">→ Sharing started. Check terminal for PIN.</div>`;
-}
-
-async function doReceive() {
-  const ip  = document.getElementById('recv-ip').value.trim();
-  const pin = document.getElementById('recv-pin').value.trim();
-  if (!ip || !pin) { toast('Enter IP and PIN', 'err'); return; }
-  await runCmd(`receive "${ip}" "${pin}"`);
-  showTab('terminal');
-}
-
-// ── PACKAGES ──────────────────────────────────────────────────────────────────
-async function doInstall() {
-  const pkgs = document.getElementById('pkg-input').value.trim();
-  const flag = document.getElementById('pkg-flag').value;
-  if (!pkgs) { toast('Enter package names', 'err'); return; }
-  await fetch('/api/install', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({packages: pkgs + (flag ? ' ' + flag : '')})});
-  toast(`Installing ${pkgs} …`, 'ok');
-  showTab('terminal');
-}
-
-function quickInstall(pkgs) {
-  document.getElementById('pkg-input').value = pkgs;
-  document.getElementById('packages-list')?.focus();
-  doInstall();
-}
-
-// ── PROJECTS ──────────────────────────────────────────────────────────────────
-async function createProject() {
-  const name = document.getElementById('new-proj-name').value.trim();
-  const type = document.getElementById('new-proj-type').value;
-  if (!name) { toast('Enter project name', 'err'); return; }
-  await runCmd(`create project "${name}" with type=${type}`);
-  document.getElementById('new-proj-name').value = '';
-  setTimeout(() => { loadProjects(); loadStats(); }, 1200);
-}
-
-// ── NOTES ─────────────────────────────────────────────────────────────────────
-async function doNote() {
-  const text = document.getElementById('note-input').value.trim();
-  if (!text) return;
-  const r = await fetch('/api/note', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({text})});
-  const d = await r.json();
-  document.getElementById('note-input').value = '';
-  renderNotes(d.notes);
-  loadStats();
-  toast('Note saved', 'ok');
-}
-
-// ── API KEY ───────────────────────────────────────────────────────────────────
-function openKeyModal()  { document.getElementById('key-modal').classList.add('open'); document.getElementById('key-input').focus(); }
-function closeKeyModal() { document.getElementById('key-modal').classList.remove('open'); }
-
-async function saveKey() {
-  const key = document.getElementById('key-input').value.trim();
-  if (!key) { toast('Enter API key', 'err'); return; }
-  await fetch('/api/setkey', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({key})});
-  closeKeyModal();
-  toast('API key saved — AI features active!', 'ok');
-  loadStats();
-}
-
-// ── TABS ──────────────────────────────────────────────────────────────────────
-function showTab(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const panel = document.getElementById('panel-' + name);
-  const tab   = document.getElementById('tab-' + name);
-  if (panel) panel.classList.add('active');
-  if (tab)   tab.classList.add('active');
-  // highlight sidebar
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+// ── Init ──
+connectOutput();
+setTimeout(()=>{
+  openWindow('terminal');
+  Object.keys(winDefs).forEach(k=>{
+    const tb=document.querySelector(`.taskbar-item[data-win="${k}"]`);
+    if(tb)tb.classList.remove('active');
   });
-  if (name === 'terminal') setTimeout(() => document.getElementById('term-full-input')?.focus(), 100);
-  if (name === 'wallet')   loadWallet();
-  if (name === 'notes')    loadNotes();
-  if (name === 'projects') loadProjects();
-}
-
-// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
-function setupInputs() {
-  // Enter to run
-  ['term-mini-input','term-full-input'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        id === 'term-mini-input' ? runMini() : runFull();
-      }
-      if (e.key === 'ArrowUp') {
-        termHistIdx = Math.min(termHistIdx + 1, termHistory.length - 1);
-        el.value = termHistory[termHistIdx] || '';
-        setTimeout(() => el.setSelectionRange(9999,9999),0);
-      }
-      if (e.key === 'ArrowDown') {
-        termHistIdx = Math.max(termHistIdx - 1, -1);
-        el.value = termHistIdx < 0 ? '' : (termHistory[termHistIdx] || '');
-      }
-    });
-  });
-  // Enter in other inputs
-  document.getElementById('ask-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doAsk(); });
-  document.getElementById('note-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doNote(); });
-  document.getElementById('key-input')?.addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
-  document.getElementById('gen-desc')?.addEventListener('keydown', e => { if(e.key==='Enter' && e.ctrlKey) doGenerate(); });
-}
-
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-function toast(msg, type='') {
-  const wrap = document.getElementById('toasts');
-  const el   = document.createElement('div');
-  el.className = 'toast' + (type ? ' ' + type : '');
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-}
-
-// ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
-setInterval(loadStats, 10000);
-setInterval(loadProjects, 15000);
+  const tb=document.querySelector(`.taskbar-item[data-win="terminal"]`);
+  if(tb)tb.classList.add('active');
+},800);
 </script>
 </body>
 </html>
